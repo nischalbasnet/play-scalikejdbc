@@ -10,7 +10,7 @@ import users.models.User
   */
 @Singleton
 class UserDAO @Inject()(
-  userPostgresDAO: UserPostgresDAO
+  userPostgresDAO: IUserPostgresDAO
 ) extends IUserDAO
 {
   def get(primaryId: String)(implicit session: DBSession = AutoSession): Option[User] =

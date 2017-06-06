@@ -2,7 +2,7 @@ package users.dao
 
 import javax.inject.{Inject, Singleton}
 
-import com.nischal.base.BaseDAO
+import com.nischal.base.BasePostgresDAO
 import com.nischal.exceptions.ModelNotFound
 import users.models.{User, UsersCompanion}
 
@@ -12,13 +12,25 @@ import users.models.{User, UsersCompanion}
 @Singleton
 class UserPostgresDAO @Inject()(
   usersCompanion: UsersCompanion
-) extends BaseDAO[User, UsersCompanion] with IUserReadDAO with IUserWriteDAO
+) extends BasePostgresDAO[User, UsersCompanion] with IUserPostgresDAO
 {
-
+  /**
+    * Needed as pattern match on generic T does not work
+    *
+    * @param optionModel
+    * @param primaryId
+    *
+    * @return
+    */
   override def modelFailMatch(optionModel: Option[User], primaryId: String): User = optionModel match {
     case Some(model: User) => model
     case None => throw ModelNotFound(modelCompanion.tableName, modelCompanion.primaryKey, primaryId)
   }
 
-  override def modelCompanion: UsersCompanion = usersCompanion
+  /**
+    * Companion class for model object
+    *
+    * @return
+    */
+  override val modelCompanion: UsersCompanion = usersCompanion
 }

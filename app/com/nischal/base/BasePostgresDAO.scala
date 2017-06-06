@@ -6,7 +6,7 @@ import scalikejdbc._
 /**
   * Created by nbasnet on 6/4/17.
   */
-abstract class BaseDAO[MT <: BaseModel, MC <: BaseModelCompanion[MT]] extends IBaseDAO[MT, String]
+abstract class BasePostgresDAO[MT <: BaseModel, MC <: BaseModelCompanion[MT]] extends IBaseDAO[MT, String]
 {
   def modelCompanion: MC
 
@@ -123,7 +123,7 @@ abstract class BaseDAO[MT <: BaseModel, MC <: BaseModelCompanion[MT]] extends IB
     * @return
     */
   def queryArchiveFilter = modelCompanion.archivedField match {
-    case Some(a: String) => sqls" AND ${a} NOT NULL "
+    case Some(a: String) => sqls" AND ${a} NOTNULL "
     case _ => sqls""
   }
 

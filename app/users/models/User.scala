@@ -5,6 +5,7 @@ import javax.inject.Singleton
 import com.nischal.Companion
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime
+import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc.{ParameterBinder, WrappedResultSet, autoConstruct}
 import users.models
@@ -25,7 +26,7 @@ case class User(
   created: DateTime,
   updated: DateTime,
   soft_deleted: Option[DateTime]
-) extends BaseModel
+) extends BaseModel with UserATC
 {
   override def insertValuesMap: Map[SQLSyntax, ParameterBinder] = ???
 
@@ -42,12 +43,8 @@ object User extends BaseModelCompanion[User]
 
   override def fromSqlResult(rn: scalikejdbc.ResultName[User])(rs: WrappedResultSet): User = autoConstruct(rs, rn)
 
-  implicit def companion = new Companion[User]
-  {
-    type C = User.type
-
-    def apply() = User
-  }
+  implicit val reads: Reads[User] = Json.format[User]
+  implicit val writes: Writes[User] = Json.format[User]
 }
 
 @Singleton
