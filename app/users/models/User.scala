@@ -2,13 +2,11 @@ package users.models
 
 import javax.inject.Singleton
 
-import com.nischal.Companion
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc.{ParameterBinder, WrappedResultSet, autoConstruct}
-import users.models
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -30,7 +28,7 @@ case class User(
 {
   override def insertValuesMap: Map[SQLSyntax, ParameterBinder] = ???
 
-  override def updateValuesMap: Map[SQLSyntax, ParameterBinder] = ???
+  override def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
 }
 
 object User extends BaseModelCompanion[User]
