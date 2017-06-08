@@ -1,4 +1,5 @@
 import com.google.inject.AbstractModule
+import users.{IUserService, UserService}
 import users.dao.{IUserDAO, IUserPostgresDAO, UserDAO, UserPostgresDAO}
 
 /**
@@ -23,5 +24,7 @@ class DIBindingModule extends AbstractModule
     bind(classOf[IUserPostgresDAO]).to(classOf[UserPostgresDAO])
     //main DAO binding
     bind(classOf[IUserDAO]).to(classOf[UserDAO])
+    //service binding
+    bind(classOf[IUserService]).to(classOf[UserService])
   }
 }

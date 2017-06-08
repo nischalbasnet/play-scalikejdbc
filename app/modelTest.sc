@@ -26,13 +26,18 @@ val userGen = LabelledGeneric[User]
 val rec = userGen.to(user)
 val s: Symbol = Symbol("user_id")
 
+def removeNone[T](opt: Option[T]) = opt match {
+  case None => None
+  case Some(n: T@unchecked) => n
+}
+
 val book =
-  ("author" ->> "Benjamin Pierce") ::
-    ("title"  ->> "Types and Programming Languages") ::
-    ("id"     ->>  262162091) ::
-    ("price"  ->>  44.11) ::
+  ("author" ->> Some("Benjamin Pierce")) ::
+    ("title"  ->> Some("Types and Programming Languages")) ::
+    ("id"     ->>  Some(262162091)) ::
+    ("price"  ->>  None) ::
     HNil
 
-book + ("author" ->> "Nischal")
+book + ("author" ->> Some("Nischal"))
 
 

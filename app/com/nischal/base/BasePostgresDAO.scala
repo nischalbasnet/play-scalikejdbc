@@ -60,10 +60,14 @@ abstract class BasePostgresDAO[MT <: BaseModel, MC <: BaseModelCompanion[MT]] ex
     query
   }
 
+  //TODO FIX the return of this function
   def save(model: MT, primaryId: Option[String])(implicit session: DBSession = AutoSession): String =
   {
     primaryId match {
-      case Some(pId: String) => performUpdate(model, pId)
+      case Some(pId: String) => {
+        performUpdate(model, pId)
+        "1" //TODO FIX THIS
+      }
       case None => performInsert(model)
     }
   }
@@ -76,15 +80,15 @@ abstract class BasePostgresDAO[MT <: BaseModel, MC <: BaseModelCompanion[MT]] ex
     }
   }
 
-  def performUpdate(model: MT, primaryId: String)(implicit session: DBSession = AutoSession): String =
+  def performUpdate(model: MT, primaryId: String)(implicit session: DBSession = AutoSession): Int =
   {
-    val updateValues = model.updateValuesMap ++ Map(modelCompanion.column.column(modelCompanion.primaryKey) -> primaryId)
+    val updateValues = model.updateValuesMap
 
-    applyUpdateAndReturnGeneratedKey {
-      insert.into(modelCompanion).namedValues(
+    applyUpdate {
+      update(modelCompanion).set(
         updateValues
-      )
-    }.asInstanceOf[String]
+      ).where.eq(modelCompanion.column.column(modelCompanion.primaryKey), primaryId)
+    }
   }
 
   def performBatchUpdate(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =

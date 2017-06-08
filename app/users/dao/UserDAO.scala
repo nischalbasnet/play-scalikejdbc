@@ -37,4 +37,14 @@ class UserDAO @Inject()(
   {
     userPostgresDAO.saveMany(model, primaryId)
   }
+
+  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int =
+  {
+    userPostgresDAO.changeUsersPassword(user, newPassword, salt)
+  }
+
+  def getByEmail(email: String)(implicit session: DBSession): Option[User] =
+  {
+    userPostgresDAO.getByEmail(email)
+  }
 }

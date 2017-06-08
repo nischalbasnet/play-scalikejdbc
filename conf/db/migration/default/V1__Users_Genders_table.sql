@@ -27,7 +27,7 @@ CREATE SEQUENCE public.users_id_seq START 1000000 CACHE 10;
 
 CREATE TABLE public.users
 (
-  user_id       VARCHAR(25)                                         NOT NULL DEFAULT 'atet_' || nextval(
+  user_id       VARCHAR(25)                                         NOT NULL DEFAULT 'usid_' || nextval(
       'users_id_seq' :: REGCLASS) :: VARCHAR,
   first_name    CHARACTER VARYING(100) COLLATE pg_catalog."default" NOT NULL,
   last_name     CHARACTER VARYING(100) COLLATE pg_catalog."default" NOT NULL,

@@ -7,6 +7,10 @@ import scalikejdbc._
   */
 abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
 {
+  type SQLSyntax[MT] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MT], MT]
+
+  def defaultTable: SQLSyntax[MT]
+
   def primaryKey: String
 
   def archivedField: Option[String]

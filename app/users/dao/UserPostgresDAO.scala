@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BasePostgresDAO
 import com.nischal.exceptions.ModelNotFound
+import scalikejdbc._
 import users.models.{User, UsersCompanion}
 
 /**
@@ -33,4 +34,31 @@ class UserPostgresDAO @Inject()(
     * @return
     */
   override val modelCompanion: UsersCompanion = usersCompanion
+
+  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int =
+  {
+    user.setPassword(newPassword).setSalt(salt)
+
+    save(user, Some(user.user_id))
+    1 //TODO Return proper result
+  }
+
+  /**
+    *
+    * @param email
+    * @param session
+    *
+    * @return
+    */
+  def getByEmail(email: String)(implicit session: DBSession): Option[User] =
+  {
+    val u = modelCompanion.syntax("u")
+    withSQL {
+      select
+        .from(User as u)
+        .where.eq(u.email, email)
+    }.map(modelCompanion.fromSqlResult(u.resultName)(_))
+      .single()
+      .apply()
+  }
 }

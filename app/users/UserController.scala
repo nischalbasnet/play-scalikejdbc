@@ -13,7 +13,7 @@ import users.models.User
   */
 @Singleton
 class UserController @Inject()(
-  userDAO: IUserDAO
+  userService: IUserService
 ) extends BaseController
 {
   implicit val session = AutoSession
@@ -26,8 +26,26 @@ class UserController @Inject()(
     * @return
     */
   def get(user_id: String) = Action {
-    userDAO.get(user_id) match {
+    userService.get(user_id) match {
       case Some(u: User) => Ok(u.toJson())
+      case _ => NotFound("User not found")
+    }
+  }
+
+  /**
+    *
+    * @param email
+    * @param new_password
+    *
+    * @return
+    */
+  def changePassword(email: String, new_password: String) = Action {
+    userService.getByEmail(email) match {
+      case Some(user: User) => {
+        val updatedUser = userService.changeUsersPassword(user, new_password)
+
+        Ok(updatedUser.toJson())
+      }
       case _ => NotFound("User not found")
     }
   }
