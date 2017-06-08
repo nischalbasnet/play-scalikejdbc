@@ -16,3 +16,4 @@ server.pid
 libexec/
 play-scalikejdbc.iml
 /conf/application.conf
+conf/application.conf
