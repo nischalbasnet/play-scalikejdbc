@@ -38,7 +38,7 @@ class UserService @Inject()(
     */
   def getByEmail(email: String): Option[User] =
   {
-    userDAO.getByEmail(email)
+    userDAO.getFor(email = Some(email)).headOption
   }
 
   /**

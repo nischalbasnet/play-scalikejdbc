@@ -11,7 +11,13 @@ trait IUserDAO extends IUserReadDAO with IUserWriteDAO
 
 trait IUserReadDAO extends IBaseReadDAO[User, String]
 {
-  def getByEmail(email: String)(implicit session: DBSession): Option[User]
+  def getFor(
+    first_name: Option[String] = None,
+    last_name: Option[String] = None,
+    email: Option[String] = None,
+    mobile_number: Option[String] = None,
+    gender_id: Option[String] = None
+  )(implicit session: DBSession): Seq[User]
 }
 
 trait IUserWriteDAO extends IBaseWriteDAO[User, String]

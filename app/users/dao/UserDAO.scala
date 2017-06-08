@@ -45,8 +45,14 @@ class UserDAO @Inject()(
     userPostgresDAO.changeUsersPassword(user, newPassword, salt)
   }
 
-  def getByEmail(email: String)(implicit session: DBSession): Option[User] =
+  def getFor(
+    first_name: Option[String] = None,
+    last_name: Option[String] = None,
+    email: Option[String] = None,
+    mobile_number: Option[String] = None,
+    gender_id: Option[String] = None
+  )(implicit session: DBSession): Seq[User] =
   {
-    userPostgresDAO.getByEmail(email)
+    userPostgresDAO.getFor(first_name, last_name, email, mobile_number, gender_id)
   }
 }

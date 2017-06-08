@@ -44,21 +44,35 @@ class UserPostgresDAO @Inject()(
   }
 
   /**
-    *
+    * General get method
+    * @param first_name
+    * @param last_name
     * @param email
+    * @param mobile_number
+    * @param gender_id
     * @param session
-    *
     * @return
     */
-  def getByEmail(email: String)(implicit session: DBSession): Option[User] =
+  def getFor(
+    first_name: Option[String] = None,
+    last_name: Option[String] = None,
+    email: Option[String] = None,
+    mobile_number: Option[String] = None,
+    gender_id: Option[String] = None
+  )(implicit session: DBSession): Seq[User] =
   {
-    val u = modelCompanion.syntax("u")
+    val u = modelCompanion.defaultTable
     withSQL {
       select
-        .from(User as u)
-        .where.eq(u.email, email)
+        .from(modelCompanion as u)
+        .where(sqls.toAndConditionOpt(
+          first_name.map(sqls.eq(u.first_name, _)),
+          last_name.map(sqls.eq(u.last_name, _)),
+          email.map(sqls.eq(u.email, _)),
+          mobile_number.map(sqls.eq(u.mobile_number, _)),
+          gender_id.map(sqls.eq(u.gender_id, _))
+        ))
     }.map(modelCompanion.fromSqlResult(u.resultName)(_))
-      .single()
-      .apply()
+      .list().apply()
   }
 }
