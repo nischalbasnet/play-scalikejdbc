@@ -3,7 +3,7 @@ package users
 import javax.inject.{Inject, Singleton}
 
 import org.joda.time.DateTime
-import scalikejdbc.DBSession
+import scalikejdbc.AutoSession
 import users.dao.IUserDAO
 import users.models.User
 
@@ -15,15 +15,16 @@ class UserService @Inject()(
   userDAO: IUserDAO
 ) extends IUserService
 {
+  implicit val session = AutoSession
+
   /**
     * Get user method
     *
     * @param user_id
-    * @param session
     *
     * @return
     */
-  def get(user_id: String)(implicit session: DBSession): Option[User] =
+  def get(user_id: String): Option[User] =
   {
     userDAO.get(user_id)
   }
@@ -32,11 +33,10 @@ class UserService @Inject()(
     * Get user by email
     *
     * @param email
-    * @param session
     *
     * @return
     */
-  def getByEmail(email: String)(implicit session: DBSession): Option[User] =
+  def getByEmail(email: String): Option[User] =
   {
     userDAO.getByEmail(email)
   }
@@ -46,11 +46,10 @@ class UserService @Inject()(
     *
     * @param user
     * @param newPassword
-    * @param session
     *
     * @return
     */
-  def changeUsersPassword(user: User, newPassword: String)(implicit session: DBSession): User =
+  def changeUsersPassword(user: User, newPassword: String): User =
   {
     val (encryptedPassword, generatedSalt) = encryptPassword(newPassword)
     val success = userDAO.changeUsersPassword(user, encryptedPassword, generatedSalt)
@@ -76,9 +75,9 @@ class UserService @Inject()(
 
 trait IUserService
 {
-  def get(user_id: String)(implicit session: DBSession): Option[User]
+  def get(user_id: String): Option[User]
 
-  def getByEmail(email: String)(implicit session: DBSession): Option[User]
+  def getByEmail(email: String): Option[User]
 
-  def changeUsersPassword(user: User, newPassword: String)(implicit session: DBSession): User
+  def changeUsersPassword(user: User, newPassword: String): User
 }

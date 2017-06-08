@@ -2,7 +2,7 @@ package users.dao
 
 import javax.inject.{Inject, Singleton}
 
-import scalikejdbc.{AutoSession, DBSession}
+import scalikejdbc.{AutoSession, DBSession, NamedAutoSession, ReadOnlyNamedAutoSession}
 import users.models.User
 
 /**
@@ -13,27 +13,29 @@ class UserDAO @Inject()(
   userPostgresDAO: IUserPostgresDAO
 ) extends IUserDAO
 {
-  def get(primaryId: String)(implicit session: DBSession = AutoSession): Option[User] =
+  val writeSession: DBSession = NamedAutoSession("write")
+
+  def get(primaryId: String)(implicit session: DBSession): Option[User] =
   {
     userPostgresDAO.get(primaryId)
   }
 
-  def getMany(primaryIds: Seq[String])(implicit session: DBSession = AutoSession): Seq[User] =
+  def getMany(primaryIds: Seq[String])(implicit session: DBSession): Seq[User] =
   {
     userPostgresDAO.getMany(primaryIds)
   }
 
-  def getOrFail(primaryId: String)(implicit session: DBSession = AutoSession): User =
+  def getOrFail(primaryId: String)(implicit session: DBSession): User =
   {
     userPostgresDAO.getOrFail(primaryId)
   }
 
-  def save(model: User, primaryId: Option[String])(implicit session: DBSession = AutoSession): String =
+  def save(model: User, primaryId: Option[String])(implicit session: DBSession): String =
   {
-    userPostgresDAO.save(model, primaryId)
+    userPostgresDAO.save(model, primaryId)(writeSession)
   }
 
-  def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
+  def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession): Seq[String] =
   {
     userPostgresDAO.saveMany(model, primaryId)
   }

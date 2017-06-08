@@ -4,8 +4,6 @@ import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
 import play.api.mvc._
-import scalikejdbc.AutoSession
-import users.dao.IUserDAO
 import users.models.User
 
 /**
@@ -16,8 +14,6 @@ class UserController @Inject()(
   userService: IUserService
 ) extends BaseController
 {
-  implicit val session = AutoSession
-
   /**
     * Get user
     *

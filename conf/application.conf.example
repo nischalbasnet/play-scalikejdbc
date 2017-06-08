@@ -16,6 +16,15 @@ db {
     host = "<dbhost>"
     database = "<database>"
   }
+  write {
+    driver = org.postgresql.Driver
+    url = "jdbc:postgresql://<dbhost>:5432/test_db"
+    username = "username"
+    password = "password"
+    port = "5432"
+    host = "<dbhost>"
+    database = "<database>"
+  }
 }
 
 # ScalikeJDBC original configuration
