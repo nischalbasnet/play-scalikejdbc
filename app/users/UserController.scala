@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
 import play.api.mvc._
+import users.dao.IUserDAO
 import users.models.User
 
 /**
@@ -11,7 +12,8 @@ import users.models.User
   */
 @Singleton
 class UserController @Inject()(
-  userService: IUserService
+  userService: IUserService,
+  implicit val userDAO: IUserDAO
 ) extends BaseController
 {
   /**
@@ -23,7 +25,10 @@ class UserController @Inject()(
     */
   def get(user_id: String) = Action {
     userService.get(user_id) match {
-      case Some(u: User) => Ok(u.toJson())
+      case Some(u: User) => {
+        println(u.gender)
+        Ok(u.toJson())
+      }
       case _ => NotFound("User not found")
     }
   }

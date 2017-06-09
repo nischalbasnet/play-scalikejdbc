@@ -2,10 +2,11 @@ package users.models
 
 import javax.inject.Singleton
 
-import com.nischal.base.{BaseModel, BaseModelCompanion}
+import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelations}
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
-import scalikejdbc.{WrappedResultSet, autoConstruct}
+import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
+import users.dao.IUserDAO
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -23,28 +24,29 @@ case class User(
   created: DateTime,
   updated: DateTime,
   soft_deleted: Option[DateTime]
-) extends BaseModel with UserATC
-
-object User extends BaseModelCompanion[User]
+) extends BaseModel[User] with UserATC with UserRelationDefinitions
 {
-  override val defaultTable: SQLSyntax[User] = syntax("u")
+  protected var _genderSetOnly: Option[Gender] = _
+}
 
-  override val tableName = "users"
-
-  override val primaryKey: String = "user_id"
-
-  override val archivedField: Option[String] = Some("soft_deleted")
-
-  override def fromSqlResult(rn: scalikejdbc.ResultName[User])(rs: WrappedResultSet): User = autoConstruct(rs, rn)
-
+object User extends UserCompanionInfo
+{
   implicit val reads: Reads[User] = Json.format[User]
   implicit val writes: Writes[User] = Json.format[User]
 }
 
+/**
+  * This class is required by the base model class to give curd ability to User model class
+  */
 @Singleton
-class UsersCompanion extends BaseModelCompanion[User]
+class UsersCompanion extends UserCompanionInfo
+
+/**
+  * Contains info the BaseModelCompanion
+  */
+trait UserCompanionInfo extends BaseModelCompanion[User]
 {
-  override val defaultTable: SQLSyntax[User] = syntax("u")
+  override val defaultTable: SQLSyntaxT[User] = syntax("u")
 
   override val tableName = "users"
 
@@ -53,4 +55,37 @@ class UsersCompanion extends BaseModelCompanion[User]
   override val archivedField: Option[String] = Some("soft_deleted")
 
   override def fromSqlResult(rn: scalikejdbc.ResultName[User])(rs: WrappedResultSet): User = autoConstruct(rs, rn)
+}
+
+/**
+  * Trait that contains the relations for user
+  */
+trait UserRelationDefinitions
+{
+  self: User =>
+
+  /**
+    * Get users genders
+    *
+    * @param userDAO
+    * @param session
+    *
+    * @return
+    */
+  def gender()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Option[Gender] =
+  {
+    if (_genderSetOnly == null) {
+      _genderSetOnly = userDAO.getUsersGender(user_id)
+    }
+    _genderSetOnly
+  }
+}
+
+/**
+  * Enum to define user relations
+  */
+object UserRelations extends BaseModelRelations
+{
+  type UserRelations = Value
+  val GENDER, ADDRESS = Value
 }

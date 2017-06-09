@@ -1,7 +1,7 @@
 package users.models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
 import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
 
@@ -12,7 +12,7 @@ trait UserATC
 {
   self: User =>
 
-  def toJson() = Json.toJson(this)
+//  def toJson()(implicit writer: Writes[User]) = Json.toJson(this)
 
   protected val _updateForm: UserUpdateForm = UserUpdateForm()
 

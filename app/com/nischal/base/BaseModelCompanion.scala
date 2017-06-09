@@ -7,20 +7,13 @@ import scalikejdbc._
   */
 abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
 {
-  type SQLSyntax[MT] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MT], MT]
+  type SQLSyntaxT[MT] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MT], MT]
 
-  def defaultTable: SQLSyntax[MT]
+  def defaultTable: SQLSyntaxT[MT]
 
   def primaryKey: String
 
   def archivedField: Option[String]
 
-  /**
-    * If empty all fields except primary id is used when inserting
-    *
-    * @return
-    */
-  def insertableFields: Seq[String] = Seq.empty
-
-  def fromSqlResult(u: ResultName[MT])(rs: WrappedResultSet): MT
+  def fromSqlResult(rn: ResultName[MT])(rs: WrappedResultSet): MT
 }
