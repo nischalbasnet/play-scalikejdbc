@@ -3,6 +3,7 @@ package users
 import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
+import com.nischal.base.NormalizedResponse.{jsonFail, jsonOk}
 import play.api.mvc._
 import users.dao.IUserDAO
 import users.models.User
@@ -25,11 +26,8 @@ class UserController @Inject()(
     */
   def get(user_id: String) = Action {
     userService.get(user_id) match {
-      case Some(u: User) => {
-        println(u.gender)
-        Ok(u.toJson())
-      }
-      case _ => NotFound("User not found")
+      case Some(u: User) => Ok(jsonOk(u.toJson()))
+      case _ => NotFound(jsonFail(message = "User not found"))
     }
   }
 
@@ -45,9 +43,9 @@ class UserController @Inject()(
       case Some(user: User) => {
         val updatedUser = userService.changeUsersPassword(user, new_password)
 
-        Ok(updatedUser.toJson())
+        Ok(jsonOk(updatedUser.toJson()))
       }
-      case _ => NotFound("User not found")
+      case _ => NotFound(jsonFail(message = "User not found"))
     }
   }
 }
