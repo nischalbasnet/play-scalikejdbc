@@ -12,9 +12,9 @@ import users.models._
   * Created by nbasnet on 6/4/17.
   */
 @Singleton
-class UserPostgresDAO @Inject()(
+class UserDbDAO @Inject()(
   usersCompanion: UsersCompanion
-) extends BaseDbDAO[User, User, UsersCompanion] with IUserPostgresDAO
+) extends BaseDbDAO[User, User, UsersCompanion] with IUserDbDAO
 {
   /**
     * Needed as pattern match on generic T does not work
@@ -50,8 +50,7 @@ class UserPostgresDAO @Inject()(
   {
     user.setPassword(newPassword).setSalt(salt)
 
-    save(user, Some(user.user_id))
-    1 //TODO Return proper result
+    performModelUpdate(user, user.user_id)
   }
 
   /**
@@ -202,5 +201,17 @@ class UserPostgresDAO @Inject()(
         .where.eq(ua.user_id, user_id)
         .and.isNull(ua.soft_deleted)
     }
+  }
+
+  /**
+    *
+    * @param user_id
+    * @param updateForm
+    *
+    * @return
+    */
+  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
+  {
+    performUpdate(user_id, updateForm.updateValuesMap)
   }
 }

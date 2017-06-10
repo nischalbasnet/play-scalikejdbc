@@ -3,7 +3,7 @@ package users.dao
 import address.models.Address
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 import scalikejdbc.DBSession
-import users.models.{Gender, User, UserAddress}
+import users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -54,6 +54,7 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
   /**
     *
     * @param user_id
+    *
     * @return
     */
   def getAddresses(user_id: String)(implicit session: DBSession): scala.Seq[UserAddress]
@@ -72,6 +73,8 @@ trait IUserWriteDAO extends IBaseWriteDAO[User, String]
     * @return
     */
   def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int
+
+  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int
 }
 
-trait IUserPostgresDAO extends IUserReadDAO with IUserWriteDAO
+trait IUserDbDAO extends IUserReadDAO with IUserWriteDAO

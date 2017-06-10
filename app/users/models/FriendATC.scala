@@ -12,13 +12,12 @@ trait FriendATC
 
   def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = Friend.syntax("tt")
+    val table = Friend.column
     val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
       table.column("user_id") -> user_id,
       table.column("friend_user_id") -> friend_user_id,
       table.column("created") -> created,
-      table.column("update") -> update,
-      table.column("soft_deleted") -> soft_deleted
+      table.column("update") -> update
     )
 
     insertMap

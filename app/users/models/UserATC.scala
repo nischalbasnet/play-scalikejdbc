@@ -1,7 +1,6 @@
 package users.models
 
 import org.joda.time.DateTime
-import play.api.libs.json.{Json, Writes}
 import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
 
@@ -12,15 +11,12 @@ trait UserATC
 {
   self: User =>
 
-//  def toJson()(implicit writer: Writes[User]) = Json.toJson(this)
-
   protected val _updateForm: UserUpdateForm = UserUpdateForm()
 
   def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = User.syntax("tt")
+    val table = User.column
     val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
-      table.column("user_id") -> user_id,
       table.column("first_name") -> first_name,
       table.column("last_name") -> last_name,
       table.column("email") -> email,
@@ -30,8 +26,7 @@ trait UserATC
       table.column("salt") -> salt,
       table.column("gender_id") -> gender_id,
       table.column("created") -> created,
-      table.column("updated") -> updated,
-      table.column("soft_deleted") -> soft_deleted
+      table.column("updated") -> updated
     )
 
     insertMap

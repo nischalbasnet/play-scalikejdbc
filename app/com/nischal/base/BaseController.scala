@@ -1,6 +1,7 @@
 package com.nischal.base
 
 import com.nischal.base.Success.Success
+import play.api.data.Form
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Controller
 
@@ -10,6 +11,15 @@ import scala.xml.{Elem, NodeBuffer}
   * Created by nbasnet on 6/4/17.
   */
 abstract class BaseController extends Controller
+{
+  val fakeId = "fake_id_used_for_creating_new_record_12345678910"
+
+  def handleRequestError[T](error: Form[T], data: JsValue = Json.obj()): JsObject = NormalizedResponse.jsonFail(
+    data = data,
+    message = error.errors.map(e => s"${e.key} = ${e.message}").mkString(""),
+    errorCode = "REQUEST_VALIDATION"
+  )
+}
 
 /**
   * Output normalizer

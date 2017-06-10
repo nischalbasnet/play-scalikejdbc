@@ -3,14 +3,14 @@ package users.dao
 import javax.inject.{Inject, Singleton}
 
 import scalikejdbc.{DBSession, NamedAutoSession}
-import users.models.{Gender, User, UserAddress}
+import users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/4/17.
   */
 @Singleton
 class UserDAO @Inject()(
-  userPostgresDAO: IUserPostgresDAO
+  userDbDAO: IUserDbDAO
 ) extends IUserDAO
 {
   val writeSession: DBSession = NamedAutoSession("write")
@@ -25,7 +25,7 @@ class UserDAO @Inject()(
     */
   def get(primaryId: String)(implicit session: DBSession): Option[User] =
   {
-    userPostgresDAO.get(primaryId)
+    userDbDAO.get(primaryId)
   }
 
   /**
@@ -38,7 +38,7 @@ class UserDAO @Inject()(
     */
   def getMany(primaryIds: Seq[String])(implicit session: DBSession): Seq[User] =
   {
-    userPostgresDAO.getMany(primaryIds)
+    userDbDAO.getMany(primaryIds)
   }
 
   /**
@@ -51,7 +51,7 @@ class UserDAO @Inject()(
     */
   def getOrFail(primaryId: String)(implicit session: DBSession): User =
   {
-    userPostgresDAO.getOrFail(primaryId)
+    userDbDAO.getOrFail(primaryId)
   }
 
   /**
@@ -65,7 +65,7 @@ class UserDAO @Inject()(
     */
   def save(model: User, primaryId: Option[String])(implicit session: DBSession = writeSession): String =
   {
-    userPostgresDAO.save(model, primaryId)
+    userDbDAO.save(model, primaryId)
   }
 
   /**
@@ -79,7 +79,7 @@ class UserDAO @Inject()(
     */
   def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession): Seq[String] =
   {
-    userPostgresDAO.saveMany(model, primaryId)
+    userDbDAO.saveMany(model, primaryId)
   }
 
   /**
@@ -94,7 +94,7 @@ class UserDAO @Inject()(
     */
   def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int =
   {
-    userPostgresDAO.changeUsersPassword(user, newPassword, salt)
+    userDbDAO.changeUsersPassword(user, newPassword, salt)
   }
 
   /**
@@ -117,7 +117,7 @@ class UserDAO @Inject()(
     gender_id: Option[String] = None
   )(implicit session: DBSession): Seq[User] =
   {
-    userPostgresDAO.getFor(first_name, last_name, email, mobile_number, gender_id)
+    userDbDAO.getFor(first_name, last_name, email, mobile_number, gender_id)
   }
 
   /**
@@ -130,7 +130,7 @@ class UserDAO @Inject()(
     */
   def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender] =
   {
-    userPostgresDAO.getUsersGender(user_id)
+    userDbDAO.getUsersGender(user_id)
   }
 
   /**
@@ -142,7 +142,7 @@ class UserDAO @Inject()(
     */
   override def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
   {
-    userPostgresDAO.getFriends(user_id)
+    userDbDAO.getFriends(user_id)
   }
 
   /**
@@ -153,6 +153,18 @@ class UserDAO @Inject()(
     */
   def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
   {
-    userPostgresDAO.getAddresses(user_id)
+    userDbDAO.getAddresses(user_id)
+  }
+
+  /**
+    *
+    * @param user_id
+    * @param updateForm
+    *
+    * @return
+    */
+  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
+  {
+    userDbDAO.save(user_id, updateForm)
   }
 }

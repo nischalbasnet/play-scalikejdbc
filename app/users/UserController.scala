@@ -4,10 +4,13 @@ import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
 import com.nischal.base.NormalizedResponse.{jsonFail, jsonOk}
+import org.joda.time.DateTime
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 import users.dao.IUserDAO
-import users.models.{User, UserAddress}
+import users.models.{User, UserAddress, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -30,6 +33,71 @@ class UserController @Inject()(
       case Some(u: User) => Ok(jsonOk(u.toJson()))
       case _ => NotFound(jsonFail(message = "User not found"))
     }
+  }
+
+  val userCreateRequest = Form(
+    mapping(
+      "user_id" -> ignored(fakeId),
+      "first_name" -> nonEmptyText,
+      "last_name" -> nonEmptyText,
+      "email" -> nonEmptyText,
+      "mobile_number" -> optional(text),
+      "image" -> ignored("default.png"),
+      "password" -> optional(text),
+      "salt" -> optional(text),
+      "gender_id" -> optional(text),
+      "created" -> ignored(DateTime.now()),
+      "updated" -> ignored(DateTime.now()),
+      "soft_deleted" -> ignored(Option(DateTime.now()))
+    )(User.apply)(User.unapply)
+  )
+
+  /**
+    * create user record
+    *
+    * @return
+    */
+  def create() = Action(parse.form(
+    userCreateRequest, onErrors = (error: Form[User]) => {
+      BadRequest(handleRequestError(error))
+    })
+  ) { implicit request =>
+    val newUser = userService.createUser(request.body)
+
+    Ok(jsonOk(newUser.toJson()))
+  }
+
+  val userUpdateRequest = Form(
+    mapping(
+      "first_name" -> optional(text),
+      "last_name" -> optional(text),
+      "email" -> optional(text),
+      "mobile_number" -> optional(text),
+      "image" -> optional(text),
+      "password" -> optional(text),
+      "salt" -> optional(text),
+      "gender_id" -> optional(text),
+      "updated" -> ignored(Option(DateTime.now())),
+      "soft_deleted" -> ignored(Option(DateTime.now()))
+    )(UserUpdateForm.apply)(UserUpdateForm.unapply)
+  )
+
+  /**
+    * Update user
+    *
+    * @param user_id
+    *
+    * @return
+    */
+  def update(user_id: String) = Action(parse.form(
+    userUpdateRequest, onErrors = (error: Form[UserUpdateForm]) => {
+      BadRequest(handleRequestError(error))
+    })
+  ) { implicit request =>
+    val updateRequest = request.body.copy(soft_deleted = None)
+
+    val updateUser = userService.updateUser(user_id, updateRequest)
+    Ok(jsonOk(data = updateUser.toJson(), message = "User update"))
   }
 
   /**

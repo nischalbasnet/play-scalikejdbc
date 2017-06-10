@@ -2,10 +2,9 @@ package users
 
 import javax.inject.{Inject, Singleton}
 
-import org.joda.time.DateTime
 import scalikejdbc.AutoSession
 import users.dao.IUserDAO
-import users.models.User
+import users.models.{User, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/7/17.
@@ -16,6 +15,7 @@ class UserService @Inject()(
 ) extends IUserService
 {
   implicit val session = AutoSession
+  //  implicit val session = StringAutoSession
 
   /**
     * Get user method
@@ -54,7 +54,7 @@ class UserService @Inject()(
     val (encryptedPassword, generatedSalt) = encryptPassword(newPassword)
     val success = userDAO.changeUsersPassword(user, encryptedPassword, generatedSalt)
 
-    if (success == 1) user.copy(password = Some(newPassword), updated = new DateTime())
+    if (success == 1) user.syncOriginal()
     else user
   }
 
@@ -71,6 +71,34 @@ class UserService @Inject()(
 
     (password, generatedSalt)
   }
+
+  /**
+    * create new user
+    *
+    * @param user
+    *
+    * @return
+    */
+  def createUser(user: User): User =
+  {
+    val newUserId = userDAO.save(user, None)
+    user.copy(user_id = newUserId)
+  }
+
+  /**
+    * update user
+    *
+    * @param user_id
+    * @param userInfo
+    *
+    * @return
+    */
+  def updateUser(user_id: String, userInfo: UserUpdateForm): User =
+  {
+    val success = userDAO.save(user_id, userInfo)
+    //get the update user now
+    userDAO.getOrFail(user_id)
+  }
 }
 
 trait IUserService
@@ -80,4 +108,8 @@ trait IUserService
   def getByEmail(email: String): Option[User]
 
   def changeUsersPassword(user: User, newPassword: String): User
+
+  def createUser(user: User): User
+
+  def updateUser(user_id: String, userInfo: UserUpdateForm): User
 }

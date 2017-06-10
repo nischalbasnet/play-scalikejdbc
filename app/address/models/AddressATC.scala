@@ -12,9 +12,8 @@ trait AddressATC
 
   def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = Address.syntax("tt")
+    val table = Address.column
     val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
-      table.column("address_id") -> address_id,
       table.column("address_1") -> address_1,
       table.column("address_2") -> address_2,
       table.column("city") -> city,
@@ -22,7 +21,6 @@ trait AddressATC
       table.column("postal_code") -> postal_code,
       table.column("created") -> created,
       table.column("updated") -> updated,
-      table.column("soft_deleted") -> soft_deleted,
       table.column("country") -> country
     )
 

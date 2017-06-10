@@ -61,29 +61,68 @@ abstract class BaseDbDAO[M, MT <: BaseModel[M], MC <: BaseModelCompanion[MT]] ex
   }
 
   //TODO FIX the return of this function
+  /**
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
   def save(model: MT, primaryId: Option[String])(implicit session: DBSession = AutoSession): String =
   {
     primaryId match {
       case Some(pId: String) => {
-        performUpdate(model, pId)
-        "1" //TODO FIX THIS
+        performModelUpdate(model, pId).toString
       }
-      case None => performInsert(model)
+      case None => performModelInsert(model)
     }
   }
 
+  /**
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
   def saveMany(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
   {
     primaryId match {
-      case Nil => performBatchInsert(model)
-      case m: Seq[MT] => performBatchUpdate(model, primaryId)
+      case Nil => performModelBatchInsert(model)
+      case m: Seq[MT] => performModelBatchUpdate(model, primaryId)
     }
   }
 
-  def performUpdate(model: MT, primaryId: String)(implicit session: DBSession = AutoSession): Int =
+  /**
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
+  def performModelUpdate(model: MT, primaryId: String)(implicit session: DBSession = AutoSession): Int =
   {
-    val updateValues = model.updateValuesMap
+    val updateValues: Map[SQLSyntax, ParameterBinder] = model.updateValuesMap
 
+    performUpdate(primaryId, updateValues)
+  }
+
+  /**
+    *
+    * @param primaryId
+    * @param updateValues
+    * @param session
+    *
+    * @return
+    */
+  def performUpdate(
+    primaryId: String,
+    updateValues: Map[SQLSyntax, ParameterBinder]
+  )(implicit session: DBSession): Int =
+  {
     applyUpdate {
       update(modelCompanion).set(
         updateValues
@@ -91,22 +130,67 @@ abstract class BaseDbDAO[M, MT <: BaseModel[M], MC <: BaseModelCompanion[MT]] ex
     }
   }
 
-  def performBatchUpdate(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
+  /**
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
+  def performModelBatchUpdate(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
   {
     throw new NotImplementedError("batch update not implemented")
   }
 
-  def performInsert(model: MT)(implicit session: DBSession = AutoSession): String =
+  /**
+    *
+    * @param model
+    * @param session
+    *
+    * @return
+    */
+  def performModelInsert(model: MT)(implicit session: DBSession = AutoSession): String =
   {
-    //TO DO fix this
-    applyUpdateAndReturnGeneratedKey {
-      insert.into(modelCompanion).namedValues(
-        model.insertValuesMap
-      )
-    }.asInstanceOf[String]
+    performInsertAndReturnId(model.insertValuesMap)
   }
 
-  def performBatchInsert(models: Seq[MT])(implicit session: DBSession = AutoSession): Seq[String] =
+  /**
+    * perfrom insert operation and return id
+    *
+    * @param insertValues
+    * @param session
+    *
+    * @return
+    */
+  def performInsertAndReturnId(
+    insertValues: Map[SQLSyntax, ParameterBinder]
+  )(implicit session: DBSession): String =
+  {
+    //Required to use SQLToResult class to insert value
+    import scalikejdbc.com.nischal.db.SqlHelpers._
+
+    withSQL {
+      insert.into(modelCompanion).namedValues(
+        insertValues
+      ).returning(modelCompanion.column.column(modelCompanion.primaryKey))
+    }
+      //now get the primary key returned from insert operation
+      .map(_.string(modelCompanion.primaryKey))
+      .first()
+      //true here allows us to use append apply method that can perform insert update operation
+      .apply(true)
+      .getOrElse("")
+  }
+
+  /**
+    *
+    * @param models
+    * @param session
+    *
+    * @return
+    */
+  def performModelBatchInsert(models: Seq[MT])(implicit session: DBSession = AutoSession): Seq[String] =
   {
     val insertFields: Seq[(SQLSyntax, ParameterBinder)] = models.head.insertValuesMap.map(_._1 -> sqls.?).toSeq
     val batchInsertValues = models.map(_.insertValuesMap.map(_._2).toSeq)

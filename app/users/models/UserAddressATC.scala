@@ -12,7 +12,7 @@ trait UserAddressATC
 
   def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = UserAddress.syntax("tt")
+    val table = UserAddress.column
     val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
       table.column("tag_name") -> tag_name,
       table.column("description") -> description,
