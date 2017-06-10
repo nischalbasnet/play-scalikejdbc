@@ -3,7 +3,7 @@ package users.dao
 import javax.inject.{Inject, Singleton}
 
 import scalikejdbc.{DBSession, NamedAutoSession}
-import users.models.{Gender, User}
+import users.models.{Gender, User, UserAddress}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -131,5 +131,28 @@ class UserDAO @Inject()(
   def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender] =
   {
     userPostgresDAO.getUsersGender(user_id)
+  }
+
+  /**
+    *
+    * @param user_id
+    * @param session
+    *
+    * @return
+    */
+  override def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
+  {
+    userPostgresDAO.getFriends(user_id)
+  }
+
+  /**
+    *
+    * @param user_id
+    *
+    * @return
+    */
+  def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
+  {
+    userPostgresDAO.getAddresses(user_id)
   }
 }

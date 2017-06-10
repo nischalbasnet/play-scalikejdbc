@@ -16,6 +16,8 @@ abstract class BaseController extends Controller
   */
 object NormalizedResponse
 {
+  def currentDateTime = org.joda.time.DateTime.now().toString("MM/dd/yyyy HH:mm:ss")
+
   /**
     * successful json response
     *
@@ -61,7 +63,7 @@ object NormalizedResponse
       "message" -> message,
       "success" -> success.id,
       "errorCode" -> errorCode,
-      "timeStamp" -> org.joda.time.DateTime.now().toString("MM/dd/yyyy HH:mm:ss")
+      "timeStamp" -> currentDateTime
     )
   }
 
@@ -119,7 +121,7 @@ object NormalizedResponse
         {success.id}
       </success>
       <timeStamp>
-        {org.joda.time.DateTime.now()}
+        {currentDateTime}
       </timeStamp>
     </Response>
   }

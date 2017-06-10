@@ -6,7 +6,7 @@ import scalikejdbc._
 /**
   * Created by nbasnet on 6/4/17.
   */
-abstract class BasePostgresDAO[M, MT <: BaseModel[M], MC <: BaseModelCompanion[MT]] extends IBaseDAO[MT, String]
+abstract class BaseDbDAO[M, MT <: BaseModel[M], MC <: BaseModelCompanion[MT]] extends IBaseDAO[MT, String]
 {
   def modelCompanion: MC
 

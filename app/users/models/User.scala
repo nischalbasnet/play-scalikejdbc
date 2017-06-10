@@ -27,6 +27,8 @@ case class User(
 ) extends BaseModel[User] with UserATC with UserRelationDefinitions
 {
   protected var _genderSetOnly: Option[Gender] = _
+  protected var _friendsSetOnly: Seq[User] = _
+  protected var _addressesSetOnly: Seq[UserAddress] = _
 }
 
 object User extends UserCompanionInfo
@@ -79,6 +81,67 @@ trait UserRelationDefinitions
     }
     _genderSetOnly
   }
+
+  /**
+    * Get friends
+    *
+    * @param userDAO
+    * @param session
+    *
+    * @return
+    */
+  def friends()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Seq[User] =
+  {
+    if (_friendsSetOnly == null) {
+      _friendsSetOnly = userDAO.getFriends(user_id)
+    }
+    _friendsSetOnly
+  }
+
+  def addresses()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Seq[UserAddress] =
+  {
+    if (_addressesSetOnly == null) {
+      _addressesSetOnly = userDAO.getAddresses(user_id)
+    }
+    _addressesSetOnly
+  }
+
+  /**
+    * RELATION setters
+    */
+
+  /**
+    * Set Gender
+    *
+    * @param gender
+    */
+  def setGender(gender: Option[Gender]): User =
+  {
+    _genderSetOnly = gender
+    this
+  }
+
+  /**
+    * set address
+    *
+    * @param addresses
+    */
+  def setAddresses(addresses: Seq[UserAddress]): User =
+  {
+    _addressesSetOnly = addresses
+    this
+  }
+
+  /**
+    * set friends
+    *
+    * @param friends
+    */
+  def setFriends(friends: Seq[User]): User =
+  {
+    _friendsSetOnly = friends
+    this
+  }
 }
 
 /**
@@ -87,5 +150,5 @@ trait UserRelationDefinitions
 object UserRelations extends BaseModelRelations
 {
   type UserRelations = Value
-  val GENDER, ADDRESS = Value
+  val GENDER, ADDRESS, FRIENDS = Value
 }

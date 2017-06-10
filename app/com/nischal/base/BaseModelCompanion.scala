@@ -1,5 +1,6 @@
 package com.nischal.base
 
+import play.api.libs.json.{JsValue, Json, Writes}
 import scalikejdbc._
 
 /**
@@ -16,4 +17,6 @@ abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
   def archivedField: Option[String]
 
   def fromSqlResult(rn: ResultName[MT])(rs: WrappedResultSet): MT
+
+  def toJson(m: Seq[MT])(implicit write: Writes[MT]): JsValue = Json.toJson(m)(Writes.traversableWrites(write))
 }

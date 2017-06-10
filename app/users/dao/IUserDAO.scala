@@ -1,8 +1,9 @@
 package users.dao
 
+import address.models.Address
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 import scalikejdbc.DBSession
-import users.models.{Gender, User}
+import users.models.{Gender, User, UserAddress}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -40,6 +41,22 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
     * @return
     */
   def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender]
+
+  /**
+    *
+    * @param user_id
+    * @param session
+    *
+    * @return
+    */
+  def getFriends(user_id: String)(implicit session: DBSession): Seq[User]
+
+  /**
+    *
+    * @param user_id
+    * @return
+    */
+  def getAddresses(user_id: String)(implicit session: DBSession): scala.Seq[UserAddress]
 }
 
 trait IUserWriteDAO extends IBaseWriteDAO[User, String]

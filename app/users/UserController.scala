@@ -4,9 +4,10 @@ import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
 import com.nischal.base.NormalizedResponse.{jsonFail, jsonOk}
+import play.api.libs.json.Json
 import play.api.mvc._
 import users.dao.IUserDAO
-import users.models.User
+import users.models.{User, UserAddress}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -45,6 +46,37 @@ class UserController @Inject()(
 
         Ok(jsonOk(updatedUser.toJson()))
       }
+      case _ => NotFound(jsonFail(message = "User not found"))
+    }
+  }
+
+  /**
+    * Get user friends
+    *
+    * @param user_id
+    *
+    * @return
+    */
+  def getFriends(user_id: String) = Action {
+    userService.get(user_id) match {
+      case Some(u: User) => Ok(
+        jsonOk(Json.toJson(u.friends))
+      )
+      case _ => NotFound(jsonFail(message = "User not found"))
+    }
+  }
+
+  /**
+    *
+    * @param user_id
+    *
+    * @return
+    */
+  def getAddresses(user_id: String) = Action {
+    userService.get(user_id) match {
+      case Some(u: User) => Ok(
+        jsonOk(UserAddress.toJson(u.addresses())(UserAddress.withAddress))
+      )
       case _ => NotFound(jsonFail(message = "User not found"))
     }
   }

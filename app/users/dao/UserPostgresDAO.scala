@@ -2,10 +2,11 @@ package users.dao
 
 import javax.inject.{Inject, Singleton}
 
-import com.nischal.base.BasePostgresDAO
+import address.models.Address
+import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
 import scalikejdbc._
-import users.models.{Gender, User, UsersCompanion}
+import users.models._
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -13,7 +14,7 @@ import users.models.{Gender, User, UsersCompanion}
 @Singleton
 class UserPostgresDAO @Inject()(
   usersCompanion: UsersCompanion
-) extends BasePostgresDAO[User, User, UsersCompanion] with IUserPostgresDAO
+) extends BaseDbDAO[User, User, UsersCompanion] with IUserPostgresDAO
 {
   /**
     * Needed as pattern match on generic T does not work
@@ -128,6 +129,78 @@ class UserPostgresDAO @Inject()(
         .on(u.gender_id, g.gender_id)
         .where.eq(u.user_id, user_id)
         .and.isNull(g.soft_deleted)
+    }
+  }
+
+  /**
+    *
+    * @param user_id
+    * @param session
+    *
+    * @return
+    */
+  def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
+  {
+    val f = Friend.defaultTable
+    val u = User.defaultTable
+
+    queryUserFriends(user_id, u, f)
+      .map(User.fromSqlResult(u.resultName)(_))
+      .list().apply()
+  }
+
+  private def queryUserFriends(
+    user_id: String,
+    u: User.SQLSyntaxT[User],
+    f: Friend.SQLSyntaxT[Friend]
+  ) =
+  {
+    withSQL {
+      select(u.resultAll)
+        .from(Friend as f)
+        .join(User as u)
+        .on(u.user_id, f.friend_user_id)
+        .where.eq(f.user_id, user_id)
+        .and.isNull(f.soft_deleted)
+    }
+  }
+
+  /**
+    *
+    * @param user_id
+    *
+    * @return
+    */
+  def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
+  {
+
+    val a = Address.defaultTable
+    val ua = UserAddress.defaultTable
+
+    queryGetUserAddresses(user_id, a, ua)
+      .map(rs => {
+        val userAddress = UserAddress.fromSqlResult(ua.resultName)(rs)
+        val address = Address.fromSqlResult(a.resultName)(rs)
+        userAddress.setAddress(address)
+
+        userAddress
+      })
+      .list().apply()
+  }
+
+  private def queryGetUserAddresses(
+    user_id: String,
+    a: Address.SQLSyntaxT[Address],
+    ua: UserAddress.SQLSyntaxT[UserAddress]
+  ) =
+  {
+    withSQL {
+      select(ua.resultAll, a.resultAll)
+        .from(UserAddress as ua)
+        .join(Address as a)
+        .on(a.address_id, ua.address_id)
+        .where.eq(ua.user_id, user_id)
+        .and.isNull(ua.soft_deleted)
     }
   }
 }

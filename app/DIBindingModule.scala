@@ -1,3 +1,5 @@
+import address.{AddressService, IAddressService}
+import address.dao.{AddressDAO, AddressDbDAO, IAddressDAO, IAddressDbDAO}
 import com.google.inject.AbstractModule
 import users.{IUserService, UserService}
 import users.dao.{IUserDAO, IUserPostgresDAO, UserDAO, UserPostgresDAO}
@@ -26,5 +28,15 @@ class DIBindingModule extends AbstractModule
     bind(classOf[IUserDAO]).to(classOf[UserDAO])
     //service binding
     bind(classOf[IUserService]).to(classOf[UserService])
+
+    /**
+      * Address DAO's
+      */
+    //postgresDAO binding
+    bind(classOf[IAddressDbDAO]).to(classOf[AddressDbDAO])
+    //main DAO binding
+    bind(classOf[IAddressDAO]).to(classOf[AddressDAO])
+    //service binding
+    bind(classOf[IAddressService]).to(classOf[AddressService])
   }
 }
