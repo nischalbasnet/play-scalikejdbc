@@ -25,6 +25,8 @@ case class Address(
   */
 object Address extends AddressCompanionInfo
 {
+  import com.nischal.JsonReaderWriter._
+
   implicit val reads: Reads[Address] = Json.format[Address]
   implicit val writes: Writes[Address] = Json.format[Address]
 }

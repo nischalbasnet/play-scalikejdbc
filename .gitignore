@@ -17,3 +17,4 @@ libexec/
 play-scalikejdbc.iml
 /conf/application.conf
 /app/TestController.scala
+/app/test.sc

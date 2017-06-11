@@ -29,6 +29,8 @@ case class UserAddress(
   */
 object UserAddress extends UserAddressCompanionInfo
 {
+  import com.nischal.JsonReaderWriter._
+
   implicit val reads: Reads[UserAddress] = Json.format[UserAddress]
   implicit val writes: Writes[UserAddress] = Json.format[UserAddress]
 

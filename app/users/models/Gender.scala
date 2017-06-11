@@ -19,6 +19,8 @@ case class Gender(
   */
 object Gender extends BaseModelCompanion[Gender]
 {
+  import com.nischal.JsonReaderWriter._
+
   implicit val reads: Reads[Gender] = Json.format[Gender]
   implicit val writes: Writes[Gender] = Json.format[Gender]
 

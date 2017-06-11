@@ -4,7 +4,7 @@ import javax.inject.Singleton
 
 import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelations}
 import org.joda.time.DateTime
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
 import users.dao.IUserDAO
 
@@ -33,8 +33,31 @@ case class User(
 
 object User extends UserCompanionInfo
 {
+
+  import com.nischal.JsonReaderWriter._
+
   implicit val reads: Reads[User] = Json.format[User]
   implicit val writes: Writes[User] = Json.format[User]
+
+  val withFullDetail: Writes[User] = new Writes[User]
+  {
+    def writes(u: User): JsValue =
+    {
+      Json.obj(
+        "user_address_id" -> u.user_id,
+        "tag_name" -> u.first_name,
+        "description" -> u.last_name,
+        "is_primary" -> u.email,
+        "user_id" -> u.mobile_number,
+        "address_id" -> u.image,
+        "created" -> u.gender_id,
+        "address" -> u.created,
+        "friends" -> u._friendsSetOnly,
+        "gender" -> u._genderSetOnly,
+        "address" -> u._addressesSetOnly
+      )
+    }
+  }
 }
 
 /**

@@ -3,6 +3,7 @@ package users.dao
 import javax.inject.{Inject, Singleton}
 
 import scalikejdbc.{DBSession, NamedAutoSession}
+import users.models.UserRelations.UserRelations
 import users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
@@ -166,5 +167,10 @@ class UserDAO @Inject()(
   def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
   {
     userDbDAO.save(user_id, updateForm)
+  }
+
+  def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
+  {
+    userDbDAO.getWith(user_id, relations)
   }
 }

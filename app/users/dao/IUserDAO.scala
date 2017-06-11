@@ -1,8 +1,8 @@
 package users.dao
 
-import address.models.Address
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 import scalikejdbc.DBSession
+import users.models.UserRelations.UserRelations
 import users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
@@ -12,6 +12,9 @@ trait IUserDAO extends IUserReadDAO with IUserWriteDAO
 
 trait IUserReadDAO extends IBaseReadDAO[User, String]
 {
+
+  def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User
+
   /**
     * Get user for different condition
     *
