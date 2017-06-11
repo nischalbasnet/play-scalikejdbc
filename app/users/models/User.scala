@@ -52,9 +52,10 @@ object User extends UserCompanionInfo
         "address_id" -> u.image,
         "created" -> u.gender_id,
         "address" -> u.created,
+        //TODO fix this to prevent null exceptions
         "friends" -> u._friendsSetOnly,
         "gender" -> u._genderSetOnly,
-        "address" -> u._addressesSetOnly
+        "address" -> UserAddress.toJson(u._addressesSetOnly)(UserAddress.withAddress)
       )
     }
   }

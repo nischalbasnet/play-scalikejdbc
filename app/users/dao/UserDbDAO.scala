@@ -115,11 +115,19 @@ class UserDbDAO @Inject()(
 
     val userInfo = fullQuery.map(rs => {
       val userAddress = Json.parse(rs.string("address")).as[Seq[UserAddress]]
+      val address = Json.parse(rs.string("address")).as[Seq[Address]]
+      //fill address to user address
+      val finalAddr = userAddress.map(ua => {
+        val addr = address.find(_.address_id == ua.address_id)
+        if(addr.isDefined) ua.setAddress(addr.get)
+        ua
+      })
+
       val friends = Json.parse(rs.string("friends")).as[Seq[User]]
       val gender = Json.parse(rs.string("gender")).as[Seq[Gender]]
 
       val usr: User = User.fromSqlResult(user.resultName)(rs)
-      usr.setAddresses(userAddress)
+      usr.setAddresses(finalAddr)
         .setFriends(friends)
         .setGender(gender.headOption)
       usr
