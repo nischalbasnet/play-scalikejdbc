@@ -28,12 +28,14 @@ db {
 }
 
 # ScalikeJDBC original configuration
-#db.default.poolInitialSize=10
-#db.default.poolMaxSize=10
+db.default.poolInitialSize=10
+db.default.poolMaxSize=10
+db.write.poolMaxSize=10
+db.write.poolMaxSize=10
 #db.default.poolValidationQuery=
 
 scalikejdbc.global.loggingSQLAndTime.enabled = true
-scalikejdbc.global.loggingSQLAndTime.singleLineMode = false
+scalikejdbc.global.loggingSQLAndTime.singleLineMode = true
 scalikejdbc.global.loggingSQLAndTime.logLevel = debug
 scalikejdbc.global.loggingSQLAndTime.warningEnabled = true
 scalikejdbc.global.loggingSQLAndTime.warningThresholdMillis = 5
@@ -47,6 +49,7 @@ play.modules.disabled += "play.api.db.DBModule"
 # ~~~~~
 # Replaced with flywaydb and disabled
 # Flyway : https://github.com/flyway/flyway-play
+db.default.migration.validateOnMigrate=false
 play.modules.enabled += "org.flywaydb.play.PlayModule"
 play.evolutions.enabled = false
 

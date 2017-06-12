@@ -1,7 +1,5 @@
 package users.models
 
-import javax.inject.Singleton
-
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
@@ -21,6 +19,9 @@ case class Friend(
   */
 object Friend extends FriendCompanionInfo
 {
+  //Important: don't remove this import
+  import com.nischal.JsonReaderWriter._
+
   implicit val reads: Reads[Friend] = Json.format[Friend]
   implicit val writes: Writes[Friend] = Json.format[Friend]
 }

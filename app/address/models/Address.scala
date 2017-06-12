@@ -1,7 +1,5 @@
 package address.models
 
-import javax.inject.Singleton
-
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
@@ -25,6 +23,7 @@ case class Address(
   */
 object Address extends AddressCompanionInfo
 {
+
   import com.nischal.JsonReaderWriter._
 
   implicit val reads: Reads[Address] = Json.format[Address]

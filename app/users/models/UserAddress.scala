@@ -1,7 +1,5 @@
 package users.models
 
-import javax.inject.Singleton
-
 import address.dao.IAddressDAO
 import address.models.Address
 import com.nischal.base.{BaseModel, BaseModelCompanion}
@@ -29,6 +27,7 @@ case class UserAddress(
   */
 object UserAddress extends UserAddressCompanionInfo
 {
+
   import com.nischal.JsonReaderWriter._
 
   implicit val reads: Reads[UserAddress] = Json.format[UserAddress]
