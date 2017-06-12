@@ -28,9 +28,6 @@ object Gender extends GenderCompanionInfo
   implicit val writes: Writes[Gender] = Json.format[Gender]
 }
 
-@Singleton
-class GenderCompanion extends GenderCompanionInfo
-
 /**
   * Contains info the BaseModelCompanion
   */

@@ -25,12 +25,6 @@ object Friend extends FriendCompanionInfo
   implicit val writes: Writes[Friend] = Json.format[Friend]
 }
 
-/**
-  * This class is required by the base model class to give curd ability to User model class
-  */
-@Singleton
-class FriendCompanion extends FriendCompanionInfo
-
 trait FriendCompanionInfo extends BaseModelCompanion[Friend]
 {
   override val defaultTable: SQLSyntaxT[Friend] = syntax("f")

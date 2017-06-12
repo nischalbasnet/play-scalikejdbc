@@ -1,6 +1,6 @@
 package users.dao
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 
 import address.models.Address
 import com.nischal.base.BaseDbDAO
@@ -14,9 +14,7 @@ import users.models._
   * Created by nbasnet on 6/4/17.
   */
 @Singleton
-class UserDbDAO @Inject()(
-  usersCompanion: UserCompanion
-) extends BaseDbDAO[User, User, UserCompanion] with IUserDbDAO
+class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
 {
   /**
     * Needed as pattern match on generic T does not work
@@ -36,7 +34,7 @@ class UserDbDAO @Inject()(
     *
     * @return
     */
-  override val modelCompanion: UserCompanion = usersCompanion
+  override val modelCompanion = User
 
   def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
   {
@@ -119,7 +117,7 @@ class UserDbDAO @Inject()(
       //fill address to user address
       val finalAddr = userAddress.map(ua => {
         val addr = address.find(_.address_id == ua.address_id)
-        if(addr.isDefined) ua.setAddress(addr.get)
+        if (addr.isDefined) ua.setAddress(addr.get)
         ua
       })
 

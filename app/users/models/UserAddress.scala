@@ -52,12 +52,6 @@ object UserAddress extends UserAddressCompanionInfo
   }
 }
 
-/**
-  * This class is required by the base model class to give curd ability to User model class
-  */
-@Singleton
-class UserAddressCompanion extends UserAddressCompanionInfo
-
 trait UserAddressCompanionInfo extends BaseModelCompanion[UserAddress]
 {
   override val defaultTable: SQLSyntaxT[UserAddress] = syntax("ua")

@@ -62,12 +62,6 @@ object User extends UserCompanionInfo
 }
 
 /**
-  * This class is required by the base model class to give curd ability to User model class
-  */
-@Singleton
-class UserCompanion extends UserCompanionInfo
-
-/**
   * Contains info the BaseModelCompanion
   */
 trait UserCompanionInfo extends BaseModelCompanion[User]

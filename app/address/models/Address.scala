@@ -31,13 +31,6 @@ object Address extends AddressCompanionInfo
   implicit val writes: Writes[Address] = Json.format[Address]
 }
 
-
-/**
-  * This class is required by the base model class to give curd ability to User model class
-  */
-@Singleton
-class AddressCompanion extends AddressCompanionInfo
-
 /**
   * Contains info the BaseModelCompanion
   */

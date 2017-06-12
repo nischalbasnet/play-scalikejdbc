@@ -1,8 +1,8 @@
 package address.dao
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 
-import address.models.{Address, AddressCompanion}
+import address.models.Address
 import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
 
@@ -10,11 +10,9 @@ import com.nischal.exceptions.ModelNotFound
   * Created by nbasnet on 6/9/17.
   */
 @Singleton
-class AddressDbDAO @Inject()(
-  val addressCompanion: AddressCompanion
-) extends BaseDbDAO[Address, Address, AddressCompanion] with IAddressDbDAO
+class AddressDbDAO extends BaseDbDAO[Address] with IAddressDbDAO
 {
-  override val modelCompanion: AddressCompanion = addressCompanion
+  override val modelCompanion = Address
 
   override def modelFailMatch(optionModel: Option[Address], primaryId: String): Address = optionModel match {
     case Some(model: Address) => model
