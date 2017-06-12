@@ -1,9 +1,12 @@
 package users.models
 
+import javax.inject.Singleton
+
 import com.nischal.base.BaseModelCompanion
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.{WrappedResultSet, autoConstruct}
+import users.models.Gender.SQLSyntaxT
 
 case class Gender(
   gender_id: String,
@@ -17,12 +20,22 @@ case class Gender(
 /**
   * Gender companion Object
   */
-object Gender extends BaseModelCompanion[Gender]
+object Gender extends GenderCompanionInfo
 {
   import com.nischal.JsonReaderWriter._
 
   implicit val reads: Reads[Gender] = Json.format[Gender]
   implicit val writes: Writes[Gender] = Json.format[Gender]
+}
+
+@Singleton
+class GenderCompanion extends GenderCompanionInfo
+
+/**
+  * Contains info the BaseModelCompanion
+  */
+trait GenderCompanionInfo extends BaseModelCompanion[Gender]
+{
 
   override val defaultTable: SQLSyntaxT[Gender] = this.syntax("g")
 
@@ -37,4 +50,3 @@ object Gender extends BaseModelCompanion[Gender]
     autoConstruct(rs, rn)
   }
 }
-

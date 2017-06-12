@@ -15,8 +15,8 @@ import users.models._
   */
 @Singleton
 class UserDbDAO @Inject()(
-  usersCompanion: UsersCompanion
-) extends BaseDbDAO[User, User, UsersCompanion] with IUserDbDAO
+  usersCompanion: UserCompanion
+) extends BaseDbDAO[User, User, UserCompanion] with IUserDbDAO
 {
   /**
     * Needed as pattern match on generic T does not work
@@ -36,7 +36,7 @@ class UserDbDAO @Inject()(
     *
     * @return
     */
-  override val modelCompanion: UsersCompanion = usersCompanion
+  override val modelCompanion: UserCompanion = usersCompanion
 
   def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
   {

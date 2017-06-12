@@ -20,3 +20,8 @@ abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
 
   def toJson(m: Seq[MT])(implicit write: Writes[MT]): JsValue = Json.toJson(m)(Writes.traversableWrites(write))
 }
+
+object SQLSyntaxType
+{
+  type SQLSyntaxT[MT] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MT], MT]
+}
