@@ -2,6 +2,7 @@ package users.dao
 
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 import scalikejdbc.DBSession
+import services.events.ModelEvent
 import users.models.UserRelations.UserRelations
 import users.models.{Gender, User, UserAddress, UserUpdateForm}
 
@@ -81,3 +82,6 @@ trait IUserWriteDAO extends IBaseWriteDAO[User, String]
 }
 
 trait IUserDbDAO extends IUserReadDAO with IUserWriteDAO
+{
+  def modelEventBus: ModelEvent[User]
+}

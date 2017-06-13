@@ -7,6 +7,8 @@ import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
 import play.api.libs.json.Json
 import scalikejdbc._
+import services.events.ModelEvent
+import users.UserMO
 import users.models.UserRelations.UserRelations
 import users.models._
 
@@ -16,6 +18,10 @@ import users.models._
 @Singleton
 class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
 {
+  override val modelEventBus: ModelEvent[User] = new ModelEvent[User]()
+
+  override val modelObserver = Some(UserMO())
+
   /**
     * Needed as pattern match on generic T does not work
     *

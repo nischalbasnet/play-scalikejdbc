@@ -2,6 +2,7 @@ package users.dao
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import scalikejdbc.{DBSession, NamedAutoSession}
 import users.models.UserRelations.UserRelations
 import users.models.{Gender, User, UserAddress, UserUpdateForm}

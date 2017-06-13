@@ -5,6 +5,7 @@ import javax.inject.Singleton
 import address.models.Address
 import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
+import services.events.ModelEvent
 
 /**
   * Created by nbasnet on 6/9/17.
@@ -13,6 +14,7 @@ import com.nischal.exceptions.ModelNotFound
 class AddressDbDAO extends BaseDbDAO[Address] with IAddressDbDAO
 {
   override val modelCompanion = Address
+  override val modelEventBus: ModelEvent[Address] = new ModelEvent[Address]()
 
   override def modelFailMatch(optionModel: Option[Address], primaryId: String): Address = optionModel match {
     case Some(model: Address) => model

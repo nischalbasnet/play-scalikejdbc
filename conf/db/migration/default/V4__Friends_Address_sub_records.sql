@@ -2,22 +2,18 @@
 INSERT INTO friends
 (user_id, friend_user_id)
 VALUES
-  ('usid_1000010', 'usid_1000011'),
-  ('usid_1000010', 'usid_1000012'),
-  ('usid_1000010', 'usid_1000015'),
-  ('usid_1000010', 'usid_1000016'),
-  ('usid_1000010', 'usid_1000018'),
-  ('usid_1000010', 'usid_1000019'),
-  ('usid_1000011', 'usid_1000010'),
-  ('usid_1000011', 'usid_1000017'),
-  ('usid_1000011', 'usid_1000019'),
-  ('usid_1000011', 'usid_1000014'),
-  ('usid_1000012', 'usid_1000010'),
-  ('usid_1000012', 'usid_1000019');
-
--- Modify Address table to add county
-ALTER TABLE public.addresses
-  ADD country VARCHAR(255) NOT NULL;
+  ('usid_1000000', 'usid_1000001'),
+  ('usid_1000000', 'usid_1000002'),
+  ('usid_1000000', 'usid_1000005'),
+  ('usid_1000000', 'usid_1000006'),
+  ('usid_1000000', 'usid_1000008'),
+  ('usid_1000000', 'usid_1000009'),
+  ('usid_1000001', 'usid_1000000'),
+  ('usid_1000001', 'usid_1000007'),
+  ('usid_1000001', 'usid_1000009'),
+  ('usid_1000001', 'usid_1000004'),
+  ('usid_1000002', 'usid_1000000'),
+  ('usid_1000002', 'usid_1000009');
 
 -- Adding addresses
 INSERT INTO addresses
@@ -57,3 +53,20 @@ CREATE TABLE public.user_addresses
   ON UPDATE CASCADE
   ON DELETE CASCADE
 );
+
+-- Adding user address record
+INSERT INTO user_addresses
+(tag_name, description, is_primary, user_id, address_id)
+VALUES
+  ('Home', 'My House', 1, 'usid_1000000', 'adid_1000000'),
+  ('Work', 'Where I work', 1, 'usid_1000000', 'adid_1000001'),
+  ('Grocery', 'Shopping', 1, 'usid_1000000', 'adid_1000002'),
+  ('Shopping', 'Fav place', 1, 'usid_1000001', 'adid_1000004'),
+  ('Play', 'Game Center', 1, 'usid_1000001', 'adid_1000002'),
+  ('Walmart', NULL, 1, 'usid_1000002', 'adid_1000004'),
+  ('Bart', 'Train station', 1, 'usid_1000003', 'adid_1000005'),
+  ('Train', 'Near home', 1, 'usid_1000004', 'adid_1000006'),
+  ('Fun', 'Kids place', 1, 'usid_1000005', 'adid_1000007'),
+  ('Fly', 'Gliding', 1, 'usid_1000006', 'adid_1000008'),
+  ('House', 'Friends house', 1, 'usid_1000007', 'adid_1000005'),
+  ('Farm', 'Work', 1, 'usid_1000008', 'adid_1000004');

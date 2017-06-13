@@ -2,6 +2,7 @@ package com.nischal.base
 
 import com.nischal.basecontracts.IBaseDAO
 import scalikejdbc._
+import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, ModelEvents}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -9,6 +10,10 @@ import scalikejdbc._
 abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
 {
   def modelCompanion: BaseModelCompanion[MT]
+
+  def modelEventBus: ModelEvent[MT]
+
+  def modelObserver: Option[IObserveModelEvent[MT]] = None
 
   def modelFailMatch(optionModel: Option[MT], primaryId: String): MT
 
@@ -123,11 +128,22 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     updateValues: Map[SQLSyntax, ParameterBinder]
   )(implicit session: DBSession): Int =
   {
-    applyUpdate {
+    val success = applyUpdate {
       update(modelCompanion).set(
         updateValues
       ).where.eq(modelCompanion.column.column(modelCompanion.primaryKey), primaryId)
     }
+
+    if (success != 0) {
+      if(modelObserver.isDefined){
+        modelEventBus.toObservable.subscribe(p => modelObserver.get.update(p))
+      }
+      modelEventBus.sendEvent(
+        ModelEventPayload(updateValues, modelCompanion, ModelEvents.UPDATED)
+      )
+    }
+
+    success
   }
 
   /**
@@ -170,7 +186,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     //Required to use SQLToResult class to insert value
     import scalikejdbc.com.nischal.db.SqlHelpers._
 
-    withSQL {
+    val returnedId = withSQL {
       insert.into(modelCompanion).namedValues(
         insertValues
       ).returning(modelCompanion.column.column(modelCompanion.primaryKey))
@@ -181,6 +197,18 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
       //true here allows us to use append apply method that can perform insert update operation
       .apply(true)
       .getOrElse("")
+
+    if (returnedId.nonEmpty) {
+      if(modelObserver.isDefined){
+        modelEventBus.toObservable.subscribe(p => modelObserver.get.created(p))
+      }
+
+      modelEventBus.sendEvent(
+        ModelEventPayload(insertValues, modelCompanion, ModelEvents.CREATED)
+      )
+    }
+
+    returnedId
   }
 
   /**
