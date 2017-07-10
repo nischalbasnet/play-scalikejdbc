@@ -27,4 +27,8 @@ libraryDependencies ++= Seq(
   "io.reactivex" %% "rxscala" % "0.26.4"
 )
 
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M9" cross CrossVersion.full)
+scalacOptions += "-Xplugin-require:macroparadise"
+scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")) // macroparadise plugin doesn't work in repl yet.
+
 scalikejdbcSettings

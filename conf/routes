@@ -5,13 +5,13 @@
 # Map static resources from the /public folder to the /assets URL path
 GET          /assets/*file                                      controllers.Assets.versioned(path="/public", file: Asset)
 
-GET          /test                                              app.TestController.test()
-GET          /test/relation                                     app.TestController.relation()
+GET          /test                                              controllers.TestController.test()
+GET          /test/relation                                     controllers.TestController.relation()
 
 # User Route
-GET          /users/:user_id                                    users.UserController.get(user_id: String)
-GET          /users/change_password/:email/:new_password        users.UserController.changePassword(email: String, new_password: String)
-GET          /users/:user_id/friends                            users.UserController.getFriends(user_id: String)
-GET          /users/:user_id/addresses                          users.UserController.getAddresses(user_id: String)
-POST         /users                                             users.UserController.create()
-PATCH        /users/:user_id                                    users.UserController.update(user_id: String)
+GET          /users/:user_id                                    controllers.UserController.get(user_id: String)
+GET          /users/change_password/:email/:new_password        controllers.UserController.changePassword(email: String, new_password: String)
+GET          /users/:user_id/friends                            controllers.UserController.getFriends(user_id: String)
+GET          /users/:user_id/addresses                          controllers.UserController.getAddresses(user_id: String)
+POST         /users                                             controllers.UserController.create()
+PATCH        /users/:user_id                                    controllers.UserController.update(user_id: String)

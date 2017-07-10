@@ -1,8 +1,8 @@
 package users.models
 
 import org.joda.time.DateTime
-import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.{ParameterBinder, autoNamedValues}
 
 /**
   * Created by nbasnet on 6/5/17.
@@ -13,21 +13,37 @@ trait UserATC
 
   protected val _updateForm: UserUpdateForm = UserUpdateForm()
 
+  val insertExcludeList = Seq(
+    "user_id",
+    "created",
+    "updated",
+    "soft_deleted"
+  )
+
   def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
     val table = User.column
-    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
-      table.column("first_name") -> first_name,
-      table.column("last_name") -> last_name,
-      table.column("email") -> email,
-      table.column("mobile_number") -> mobile_number,
-      table.column("image") -> image,
-      table.column("password") -> password,
-      table.column("salt") -> salt,
-      table.column("gender_id") -> gender_id,
-      table.column("created") -> created,
-      table.column("updated") -> updated
+
+    val insertMap = autoNamedValues[User](
+      this,
+      table,
+      "user_id",
+      "created",
+      "updated",
+      "soft_deleted"
     )
+    //    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
+    //      table.column("first_name") -> first_name,
+    //      table.column("last_name") -> last_name,
+    //      table.column("email") -> email,
+    //      table.column("mobile_number") -> mobile_number,
+    //      table.column("image") -> image,
+    //      table.column("password") -> password,
+    //      table.column("salt") -> salt,
+    //      table.column("gender_id") -> gender_id,
+    //      table.column("created") -> created,
+    //      table.column("updated") -> updated
+    //    )
 
     insertMap
   }

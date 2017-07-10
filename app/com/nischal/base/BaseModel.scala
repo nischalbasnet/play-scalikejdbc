@@ -14,4 +14,6 @@ abstract class BaseModel[T] extends ToJson[T]
   def insertValuesMap: Map[SQLSyntax, ParameterBinder]
 
   def updateValuesMap: Map[SQLSyntax, ParameterBinder]
+
+  def setRelation[A](relation: BaseModel[A]) = ???
 }

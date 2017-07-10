@@ -16,7 +16,9 @@ case class ModelRelation[FT, TT, JT](
   toTableKey: String,
   junctionTable: Option[BaseModelCompanion[JT]] = None,
   junctionFromTableKey: Option[String] = None,
-  junctionToTableKey: Option[String] = None
+  junctionToTableKey: Option[String] = None,
+  toTableAlias: Option[String] = None,
+  junctionTableAlias: Option[String] = None
 )
 {
   /**
@@ -136,6 +138,7 @@ case class ModelRelation[FT, TT, JT](
 
     //get proper to table info
     val properToSyntax = if (toSyntax.isDefined) toSyntax.get
+    else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
     else toTable.defaultTable
 
     //get proper select fields
@@ -165,6 +168,9 @@ case class ModelRelation[FT, TT, JT](
         case _ => q
       }
     })
+
+    if (relationType == RelationTypes.ONE_TO_ONE) toQuery.limit(1)
+    else toQuery
   }
 
   private def defaultJunctionQuerySimple(
@@ -211,7 +217,9 @@ case class ModelRelation[FT, TT, JT](
     val properJunctionTable = junctionTable.getOrElse(throw new Exception("Junction table needs to be defined for relation"))
     val properJunctionToKey = junctionToTableKey.getOrElse(throw new Exception("Junction table needs to be defined for relation"))
     val properJunctionFromKey = junctionFromTableKey.getOrElse(throw new Exception("Junction table needs to be defined for relation"))
+
     val properJunctionSyntax = if (junctionSyntax.isDefined) junctionSyntax.get
+    else if (junctionTableAlias.isDefined) properJunctionTable.syntax(junctionTableAlias.get)
     else properJunctionTable.defaultTable
 
     //get proper from table info
@@ -220,6 +228,7 @@ case class ModelRelation[FT, TT, JT](
 
     //get proper to table info
     val properToSyntax = if (toSyntax.isDefined) toSyntax.get
+    else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
     else toTable.defaultTable
 
     //get proper select fields
@@ -256,6 +265,9 @@ case class ModelRelation[FT, TT, JT](
         case _ => q
       }
     })
+
+    if (relationType == RelationTypes.ONE_TO_ONE) toQuery.limit(1)
+    else toQuery
   }
 
   def getJoinSubQuery(
@@ -269,22 +281,22 @@ case class ModelRelation[FT, TT, JT](
     returnJunctionTableInfo: Boolean = false
   ): SQLSyntax =
   {
-    sqls"""
-    $joinType JOIN
-    (
-    ${
-      getQuery(
-        linkKey = linkKey,
-        fromSyntax = fromSyntax,
-        toSyntax = toSyntax,
-        junctionSyntax = junctionSyntax,
-        aliasedResultName = aliasedResultName,
-        returnJunctionTableInfo = returnJunctionTableInfo,
-        getSimpleQuery = false
+    import scalikejdbc.com.nischal.db.SqlHelpers.createSqlSyntax
+
+    sqls""
+      .append(createSqlSyntax(s"$joinType JOIN ("))
+      .append(
+        getQuery(
+          linkKey = linkKey,
+          fromSyntax = fromSyntax,
+          toSyntax = toSyntax,
+          junctionSyntax = junctionSyntax,
+          aliasedResultName = aliasedResultName,
+          returnJunctionTableInfo = returnJunctionTableInfo,
+          getSimpleQuery = false
+        ).toSQLSyntax
       )
-    }
-    ) $subQueryAlias
-    """
+      .append(createSqlSyntax(s") $subQueryAlias"))
   }
 }
 

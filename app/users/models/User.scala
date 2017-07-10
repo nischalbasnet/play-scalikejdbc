@@ -1,10 +1,13 @@
 package users.models
 
+import address.models.Address
 import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelations}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
 import users.dao.IUserDAO
+import com.nischal.ClassToMap
+import com.nischal.db.{ModelRelation, RelationTypes}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -56,6 +59,9 @@ object User extends UserCompanionInfo
   {
     def writes(u: User): JsValue =
     {
+      val friends = if (u._friendsSetOnly == null) Seq.empty else u._friendsSetOnly
+      val gender = if (u._genderSetOnly == null) None else u._genderSetOnly
+      val addresses = if (u._addressesSetOnly == null) Seq.empty else u._addressesSetOnly
       Json.obj(
         "user_address_id" -> u.user_id,
         "tag_name" -> u.first_name,
@@ -66,9 +72,9 @@ object User extends UserCompanionInfo
         "created" -> u.gender_id,
         "address" -> u.created,
         //TODO fix this to prevent null exceptions
-        "friends" -> u._friendsSetOnly,
-        "gender" -> u._genderSetOnly,
-        "address" -> UserAddress.toJson(u._addressesSetOnly)(UserAddress.withAddress)
+        "friends" -> friends,
+        "gender" -> gender,
+        "address" -> UserAddress.toJson(addresses)(UserAddress.withAddress)
       )
     }
   }
@@ -182,4 +188,53 @@ object UserRelations extends BaseModelRelations
 {
   type UserRelations = Value
   val GENDER, ADDRESS, FRIENDS = Value
+}
+
+object UserRelationShips extends Enumeration
+{
+
+  //  type UserRelations = Value
+
+  case class Val[TT, JT](
+    name: String,
+    relation: ModelRelation[User, TT, JT],
+    returnJunctionTableInfo: Boolean = false
+  ) extends super.Val
+
+  //  implicit def valueToRelationVal(x: Value) = x.asInstanceOf[Val]
+
+  val GENDER = Val[Gender, Nothing]("gender", ModelRelation[User, Gender, Nothing](
+    relationType = RelationTypes.ONE_TO_ONE,
+    fromTable = User,
+    fromTableKey = "gender_id",
+    toTable = Gender,
+    toTableKey = "gender_id"
+  ))
+
+  val ADDRESS = Val(
+    "address",
+    ModelRelation[User, Address, UserAddress](
+      relationType = RelationTypes.MANY_TO_MANY,
+      fromTable = User,
+      fromTableKey = "user_id",
+      toTable = Address,
+      toTableKey = "address_id",
+      junctionTable = Some(UserAddress),
+      junctionFromTableKey = Some("user_id"),
+      junctionToTableKey = Some("address_id")
+    ),
+    returnJunctionTableInfo = true
+  )
+
+  val FRIENDS = Val("friends", ModelRelation[User, User, Friend](
+    relationType = RelationTypes.MANY_TO_MANY,
+    fromTable = User,
+    fromTableKey = "user_id",
+    toTable = User,
+    toTableKey = "user_id",
+    toTableAlias = Some("fu"),
+    junctionTable = Some(Friend),
+    junctionFromTableKey = Some("user_id"),
+    junctionToTableKey = Some("friend_user_id")
+  ))
 }

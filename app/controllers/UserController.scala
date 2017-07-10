@@ -1,4 +1,4 @@
-package users
+package controllers
 
 import javax.inject.{Inject, Singleton}
 
@@ -9,6 +9,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
+import users.IUserService
 import users.dao.IUserDAO
 import users.models.{User, UserAddress, UserUpdateForm}
 

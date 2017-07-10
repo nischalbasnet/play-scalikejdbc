@@ -1,6 +1,7 @@
 package scalikejdbc.com.nischal.db
 
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
+import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc.{AutoSession, ConnectionPoolContext, DB, DBSession, NamedAutoSession, NamedDB, NoConnectionPoolContext, ReadOnlyAutoSession, ReadOnlyNamedAutoSession, SQLToResult, WithExtractor}
 
 /**
@@ -39,6 +40,8 @@ object SqlHelpers
       // format: ON
     }
   }
+
+  def createSqlSyntax(statement: String, parameters: Seq[Any] = Nil) = SQLSyntax(statement, parameters)
 
   /**
     * Implicit binder for any val
