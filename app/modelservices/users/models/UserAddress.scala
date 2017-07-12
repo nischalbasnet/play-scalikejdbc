@@ -1,7 +1,7 @@
-package users.models
+package modelservices.users.models
 
-import address.dao.IAddressDAO
-import address.models.Address
+import modelservices.address.dao.IAddressDAO
+import modelservices.address.models.Address
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}

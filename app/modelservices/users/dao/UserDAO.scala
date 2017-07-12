@@ -1,11 +1,11 @@
-package users.dao
+package modelservices.users.dao
 
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
 import scalikejdbc.{DBSession, NamedAutoSession}
-import users.models.UserRelations.UserRelations
-import users.models.{Gender, User, UserAddress, UserUpdateForm}
+import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -123,7 +123,7 @@ class UserDAO @Inject()(
   }
 
   /**
-    * Get users gender
+    * Get modelservices.users gender
     *
     * @param user_id
     * @param session

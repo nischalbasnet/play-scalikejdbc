@@ -1,8 +1,8 @@
-package address.dao
+package modelservices.address.dao
 
 import javax.inject.Singleton
 
-import address.models.Address
+import modelservices.address.models.Address
 import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
 import services.events.ModelEvent

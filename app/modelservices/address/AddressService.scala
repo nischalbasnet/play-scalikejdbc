@@ -1,4 +1,4 @@
-package address
+package modelservices.address
 
 /**
   * Created by nbasnet on 6/9/17.

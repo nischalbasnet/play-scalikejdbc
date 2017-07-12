@@ -1,8 +1,8 @@
-package address.dao
+package modelservices.address.dao
 
 import javax.inject.{Inject, Singleton}
 
-import address.models.Address
+import modelservices.address.models.Address
 import scalikejdbc.DBSession
 
 /**

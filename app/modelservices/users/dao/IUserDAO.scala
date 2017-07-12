@@ -1,10 +1,10 @@
-package users.dao
+package modelservices.users.dao
 
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 import scalikejdbc.DBSession
 import services.events.ModelEvent
-import users.models.UserRelations.UserRelations
-import users.models.{Gender, User, UserAddress, UserUpdateForm}
+import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.models.{Gender, User, UserAddress, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -67,7 +67,7 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
 trait IUserWriteDAO extends IBaseWriteDAO[User, String]
 {
   /**
-    * Change users password
+    * Change modelservices.users password
     *
     * @param user
     * @param newPassword

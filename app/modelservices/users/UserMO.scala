@@ -1,14 +1,14 @@
-package users
+package modelservices.users
 
 import play.api.Logger
 import services.events.{IObserveModelEvent, ModelEventPayload}
-import users.models.User
+import modelservices.users.models.User
 
 /**
   * Created by nbasnet on 6/12/17.
   */
 /**
-  * Observer for users model events
+  * Observer for modelservices.users model events
   */
 class UserMO extends IObserveModelEvent[User]
 {

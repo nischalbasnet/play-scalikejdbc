@@ -2,7 +2,7 @@ package com.nischal.base
 
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
-import users.models.User
+import modelservices.users.models.User
 
 /**
   * Created by nbasnet on 6/4/17.

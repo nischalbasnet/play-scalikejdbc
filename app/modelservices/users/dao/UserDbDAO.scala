@@ -1,16 +1,16 @@
-package users.dao
+package modelservices.users.dao
 
 import javax.inject.Singleton
 
-import address.models.Address
+import modelservices.address.models.Address
 import com.nischal.base.BaseDbDAO
 import com.nischal.exceptions.ModelNotFound
 import play.api.libs.json.Json
 import scalikejdbc._
 import services.events.ModelEvent
-import users.UserMO
-import users.models.UserRelations.UserRelations
-import users.models._
+import modelservices.users.UserMO
+import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.models._
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -141,7 +141,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
   }
 
   /**
-    * Change users password
+    * Change modelservices.users password
     *
     * @param user
     * @param newPassword
@@ -193,7 +193,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
   }
 
   /**
-    * Get users gender
+    * Get modelservices.users gender
     *
     * @param user_id
     * @param session
@@ -212,7 +212,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
   }
 
   /**
-    * Query to get users gender
+    * Query to get modelservices.users gender
     *
     * @param user_id
     * @param g

@@ -1,13 +1,14 @@
-package users.models
+package modelservices.users.models
 
-import address.models.Address
+import modelservices.address.models.Address
 import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelations}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
-import users.dao.IUserDAO
+import modelservices.users.dao.IUserDAO
 import com.nischal.ClassToMap
 import com.nischal.db.{ModelRelation, RelationTypes}
+import modelservices.RelationDescriptions
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -104,7 +105,7 @@ trait UserRelationDefinitions
   self: User =>
 
   /**
-    * Get users genders
+    * Get modelservices.users genders
     *
     * @param userDAO
     * @param session
@@ -203,38 +204,13 @@ object UserRelationShips extends Enumeration
 
   //  implicit def valueToRelationVal(x: Value) = x.asInstanceOf[Val]
 
-  val GENDER = Val[Gender, Nothing]("gender", ModelRelation[User, Gender, Nothing](
-    relationType = RelationTypes.ONE_TO_ONE,
-    fromTable = User,
-    fromTableKey = "gender_id",
-    toTable = Gender,
-    toTableKey = "gender_id"
-  ))
+  val GENDER = Val[Gender, Nothing]("gender", RelationDescriptions.userGender)
 
   val ADDRESS = Val(
     "address",
-    ModelRelation[User, Address, UserAddress](
-      relationType = RelationTypes.MANY_TO_MANY,
-      fromTable = User,
-      fromTableKey = "user_id",
-      toTable = Address,
-      toTableKey = "address_id",
-      junctionTable = Some(UserAddress),
-      junctionFromTableKey = Some("user_id"),
-      junctionToTableKey = Some("address_id")
-    ),
+    RelationDescriptions.userAddresses,
     returnJunctionTableInfo = true
   )
 
-  val FRIENDS = Val("friends", ModelRelation[User, User, Friend](
-    relationType = RelationTypes.MANY_TO_MANY,
-    fromTable = User,
-    fromTableKey = "user_id",
-    toTable = User,
-    toTableKey = "user_id",
-    toTableAlias = Some("fu"),
-    junctionTable = Some(Friend),
-    junctionFromTableKey = Some("user_id"),
-    junctionToTableKey = Some("friend_user_id")
-  ))
+  val FRIENDS = Val("friends", RelationDescriptions.userFriends)
 }

@@ -1,4 +1,4 @@
-package users.models
+package modelservices.users.models
 
 import javax.inject.Singleton
 
@@ -6,7 +6,7 @@ import com.nischal.base.BaseModelCompanion
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.{WrappedResultSet, autoConstruct}
-import users.models.Gender.SQLSyntaxT
+import modelservices.users.models.Gender.SQLSyntaxT
 
 case class Gender(
   gender_id: String,

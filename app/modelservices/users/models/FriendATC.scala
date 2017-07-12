@@ -1,4 +1,4 @@
-package users.models
+package modelservices.users.models
 
 import org.joda.time.DateTime
 import scalikejdbc.ParameterBinder

@@ -2,17 +2,17 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
-import address.models.Address
+import modelservices.address.models.Address
 import com.nischal.base.{BaseController, BaseModel}
 import com.nischal.db.{ModelRelation, RelationTypes}
 import play.api.libs.json.{Json, Reads, Writes}
 import play.api.mvc.Action
 import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax
-import users.{IUserService, models}
-import users.dao.IUserDAO
-import users.models.UserRelations.UserRelations
-import users.models._
+import modelservices.users.{IUserService, models}
+import modelservices.users.dao.IUserDAO
+import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.models._
 
 /**
   * Created by nbasnet on 6/10/17.
@@ -135,13 +135,13 @@ class TestController @Inject()(
         createSqlSyntax(s",json_agg(row_to_json($subQueryAlias.*)) as ${r.name} ")
       )
 
-      val onQueryCondition = if (r.relation.fromTable.archivedField.isDefined) {
-        s"$subQueryAlias.${r.relation.fromTable.archivedField.getOrElse("")} ISNULL"
-      }
-      else if (r.relation.toTable.columns.contains(r.relation.fromTableKey)) {
-        s"$subQueryAlias.${r.relation.fromTableKey} = ${user.column(r.relation.fromTableKey).value}"
-      }
-      else ""
+      //      val onQueryCondition = if (r.relation.fromTable.archivedField.isDefined) {
+      //        s"$subQueryAlias.${r.relation.fromTable.archivedField.getOrElse("")} ISNULL"
+      //      }
+      //      else if (r.relation.toTable.columns.contains(r.relation.fromTableKey)) {
+      //        s"$subQueryAlias.${r.relation.fromTableKey} = ${user.column(r.relation.fromTableKey).value}"
+      //      }
+      //      else ""
 
       relationJoins = relationJoins.append(
         sqls"""${
@@ -153,9 +153,9 @@ class TestController @Inject()(
             returnJunctionTableInfo = r.returnJunctionTableInfo
           )
         }"""
-          .append(createSqlSyntax(
-            s""" ON $onQueryCondition """
-          ))
+          .append(
+            sqls""" ON TRUE """
+          )
       )
       relationCount += 1
     }

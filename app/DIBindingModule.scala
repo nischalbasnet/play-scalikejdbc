@@ -1,8 +1,8 @@
-import address.{AddressService, IAddressService}
-import address.dao.{AddressDAO, AddressDbDAO, IAddressDAO, IAddressDbDAO}
+import modelservices.address.{AddressService, IAddressService}
+import modelservices.address.dao.{AddressDAO, AddressDbDAO, IAddressDAO, IAddressDbDAO}
 import com.google.inject.AbstractModule
-import users.{IUserService, UserService}
-import users.dao.{IUserDAO, IUserDbDAO, UserDAO, UserDbDAO}
+import modelservices.users.{IUserService, UserService}
+import modelservices.users.dao.{IUserDAO, IUserDbDAO, UserDAO, UserDbDAO}
 
 /**
   * Created by nbasnet on 6/5/17.

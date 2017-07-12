@@ -1,10 +1,10 @@
-package users
+package modelservices.users
 
 import javax.inject.{Inject, Singleton}
 
 import scalikejdbc.AutoSession
-import users.dao.IUserDAO
-import users.models.{User, UserUpdateForm}
+import modelservices.users.dao.IUserDAO
+import modelservices.users.models.{User, UserUpdateForm}
 
 /**
   * Created by nbasnet on 6/7/17.

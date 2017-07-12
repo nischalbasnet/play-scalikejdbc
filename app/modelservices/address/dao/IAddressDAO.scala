@@ -1,6 +1,6 @@
-package address.dao
+package modelservices.address.dao
 
-import address.models.Address
+import modelservices.address.models.Address
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
 
 /**

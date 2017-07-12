@@ -1,4 +1,4 @@
-package address.models
+package modelservices.address.models
 
 import org.joda.time.DateTime
 import scalikejdbc.ParameterBinder

@@ -1,4 +1,4 @@
-package users.models
+package modelservices.users.models
 
 import com.nischal.base.{BaseModel, BaseModelCompanion}
 import org.joda.time.DateTime

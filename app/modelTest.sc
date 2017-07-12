@@ -4,7 +4,7 @@ import scalikejdbc.interpolation.SQLSyntax
 import shapeless.{HNil, LabelledGeneric}
 import shapeless.syntax.singleton._
 import shapeless.record._
-import users.models.User
+import modelservices.users.models.User
 
 val user = User(
   user_id = "uid_112",
