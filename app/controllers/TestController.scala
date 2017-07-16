@@ -3,7 +3,7 @@ package controllers
 import javax.inject.{Inject, Singleton}
 
 import modelservices.address.models.Address
-import com.nischal.base.{BaseController, BaseModel}
+import com.nischal.base.{BaseController, BaseModel, RelationDetail}
 import com.nischal.db.{ModelRelation, RelationTypes}
 import play.api.libs.json.{Json, Reads, Writes}
 import play.api.mvc.Action
@@ -28,12 +28,13 @@ class TestController @Inject()(
   def test() = Action {
     val userId = "usid_1000010"
 
-    val userDetail = userDAO.getWith(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
+//    val userDetail = userDAO.getWithOld(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
 
-    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+//    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+    val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
 
     //    Ok(userDetail.toJson()(User.withFullDetail))
-    Ok(userD.toJson()(User.withFullDetail))
+    Ok(userDt.get.toJson()(User.withFullDetail))
     //        Ok(userD.statement)
   }
 
@@ -70,7 +71,7 @@ class TestController @Inject()(
     Ok(userAddress.getQuery(userId, returnJunctionTableInfo = true, aliasedResultName = false).toSQL.statement)
   }
 
-  def getWith(user_id: String, relations: Seq[UserRelationShips.Val[_, _]])(implicit session: DBSession) =
+  def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession) =
   {
     val user: models.User.SQLSyntaxT[User] = User.defaultTable
     val fullQuery = queryGetWith(user, user_id, relations)
@@ -113,7 +114,7 @@ class TestController @Inject()(
   def queryGetWith(
     user: models.User.SQLSyntaxT[User],
     user_id: String,
-    relations: Seq[UserRelationShips.Val[_, _]]
+    relations: Seq[RelationDetail[_, _, _]]
   )(implicit session: DBSession): SQL[Nothing, NoExtractor] =
   {
     var selectFields = sqls"SELECT ${user.resultAll}"
@@ -128,7 +129,7 @@ class TestController @Inject()(
     var relationCount = 0
     //load the relations
     relations.foreach { r =>
-      import scalikejdbc.com.nischal.db.SqlHelpers.createSqlSyntax
+      import scalikejdbc.nischalmod.SqlHelpers.createSqlSyntax
       val subQueryAlias = s"${r.relation.fromTableKey.head}_$relationCount${r.relation.toTableKey.head}"
       //add to select field
       selectFields = selectFields.append(

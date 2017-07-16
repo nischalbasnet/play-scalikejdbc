@@ -1,8 +1,4 @@
-package com.nischal.db
-
-import java.sql.PreparedStatement
-
-import scalikejdbc.{AutoSession, DBSession, NamedAutoSession, SettingsProvider}
+package scalikejdbc.nischalmod
 
 /**
   * Created by nbasnet on 6/10/17.

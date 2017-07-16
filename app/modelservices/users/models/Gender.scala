@@ -2,7 +2,8 @@ package modelservices.users.models
 
 import javax.inject.Singleton
 
-import com.nischal.base.BaseModelCompanion
+import com.nischal.base.{BaseModelCompanion, BaseModelRelationShips}
+import modelservices.RelationDescriptions
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.{WrappedResultSet, autoConstruct}
@@ -22,10 +23,20 @@ case class Gender(
   */
 object Gender extends GenderCompanionInfo
 {
+
   import com.nischal.JsonReaderWriter._
+
+  val genderSeq = shapeless.TypeCase[Seq[Gender]]
 
   implicit val reads: Reads[Gender] = Json.format[Gender]
   implicit val writes: Writes[Gender] = Json.format[Gender]
+
+  override def setModelRelation[A](model: Gender, relation: Seq[A]): Unit =
+  {
+    relation match {
+      case _ => println(s"SETTER IS NOT DEFINED FOR => $relation")
+    }
+  }
 }
 
 /**
@@ -46,4 +57,9 @@ trait GenderCompanionInfo extends BaseModelCompanion[Gender]
   {
     autoConstruct(rs, rn)
   }
+}
+
+object GenderRelationShips extends BaseModelRelationShips
+{
+  val USERS = Val[Gender, User, Nothing]("users", RelationDescriptions.genderUsers)
 }

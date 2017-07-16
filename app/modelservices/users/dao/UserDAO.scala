@@ -2,6 +2,7 @@ package modelservices.users.dao
 
 import javax.inject.{Inject, Singleton}
 
+import com.nischal.base.RelationDetail
 import play.api.Logger
 import scalikejdbc.{DBSession, NamedAutoSession}
 import modelservices.users.models.UserRelations.UserRelations
@@ -170,7 +171,12 @@ class UserDAO @Inject()(
     userDbDAO.save(user_id, updateForm)
   }
 
-  def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
+  def getWithOld(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
+  {
+    userDbDAO.getWithOld(user_id, relations)
+  }
+
+  def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession): Option[User] =
   {
     userDbDAO.getWith(user_id, relations)
   }

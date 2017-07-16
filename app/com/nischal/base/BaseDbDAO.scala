@@ -1,8 +1,9 @@
 package com.nischal.base
 
 import com.nischal.basecontracts.IBaseDAO
-import scalikejdbc._
+import play.api.libs.json.{Json, Reads}
 import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, ModelEvents}
+import scalikejdbc._
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -33,6 +34,101 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
       .apply()
 
     query
+  }
+
+  /**
+    * Get model with the given relations
+    *
+    * @param primaryId
+    * @param relations
+    * @param session
+    *
+    * @return
+    */
+  def getWith(primaryId: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession = AutoSession): Option[MT] =
+  {
+    val table = modelCompanion.syntax("tt")
+
+    val fullQuery = queryGetWithRelations(primaryId, relations)
+
+    val modelInfo = fullQuery.map(rs => {
+      val mdl: MT = modelCompanion.fromSqlResult(table.resultName)(rs)
+
+      //set relation value from result set
+      relations.foreach(r => {
+        val tpe = r.relation.toTable
+        val relationValueSet = Json.parse(rs.string(r.name)).as[Set[tpe.Model]](Reads.set(tpe.reads))
+
+        modelCompanion.setModelRelation(mdl, relationValueSet.toSeq)
+      })
+
+      mdl
+    }).first().apply()
+
+    modelInfo
+  }
+
+  /**
+    * Query to get the model along with the given relations
+    *
+    * @param primaryId
+    * @param relations
+    * @param session
+    *
+    * @return
+    */
+  private def queryGetWithRelations(
+    primaryId: String,
+    relations: Seq[RelationDetail[_, _, _]]
+  )(implicit session: DBSession): SQL[Nothing, NoExtractor] =
+  {
+    val table = modelCompanion.syntax("tt")
+
+    var selectFields = sqls"SELECT ${table.resultAll}"
+    var relationJoins = sqls""
+    val modelFilter =
+      sqls"""
+            WHERE ${table.column(modelCompanion.primaryKey)} = $primaryId
+            ${queryArchiveFilter}
+            GROUP BY ${table.column(modelCompanion.primaryKey)}
+          """
+
+    var relationCount = 0
+    //load the relations
+    relations.foreach { r =>
+      import scalikejdbc.nischalmod.SqlHelpers.createSqlSyntax
+      val subQueryAlias = s"${r.relation.fromTableKey.head}_$relationCount${r.relation.toTableKey.head}"
+      //add to select field
+      selectFields = selectFields.append(
+        createSqlSyntax(s",json_agg(row_to_json($subQueryAlias.*)) as ${r.name} ")
+      )
+
+      relationJoins = relationJoins.append(
+        sqls"""${
+          r.relation.getJoinSubQuery(
+            "left",
+            subQueryAlias,
+            primaryId,
+            aliasedResultName = false,
+            returnJunctionTableInfo = r.returnJunctionTableInfo
+          )
+        }"""
+          .append(
+            sqls""" ON TRUE """
+          )
+      )
+      relationCount += 1
+    }
+
+    val fullQuery =
+      sql"""
+           $selectFields
+            FROM ${modelCompanion.as(table)}
+              $relationJoins
+            $modelFilter
+         """
+
+    fullQuery
   }
 
   /**
@@ -135,7 +231,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     }
 
     if (success != 0) {
-      if(modelObserver.isDefined){
+      if (modelObserver.isDefined) {
         modelEventBus.toObservable.subscribe(p => modelObserver.get.update(p))
       }
       modelEventBus.sendEvent(
@@ -184,7 +280,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
   )(implicit session: DBSession): String =
   {
     //Required to use SQLToResult class to insert value
-    import scalikejdbc.com.nischal.db.SqlHelpers._
+    import scalikejdbc.nischalmod.SqlHelpers._
 
     val returnedId = withSQL {
       insert.into(modelCompanion).namedValues(
@@ -199,7 +295,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
       .getOrElse("")
 
     if (returnedId.nonEmpty) {
-      if(modelObserver.isDefined){
+      if (modelObserver.isDefined) {
         modelEventBus.toObservable.subscribe(p => modelObserver.get.created(p))
       }
 

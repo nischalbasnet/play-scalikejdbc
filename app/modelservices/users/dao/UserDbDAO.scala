@@ -42,7 +42,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   override val modelCompanion = User
 
-  def getWith(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
+  def getWithOld(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
   {
     val user = User.defaultTable
 

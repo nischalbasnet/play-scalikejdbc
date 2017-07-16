@@ -1,4 +1,4 @@
-package scalikejdbc.com.nischal.db
+package scalikejdbc.nischalmod
 
 import scalikejdbc.GeneralizedTypeConstraintsForWithExtractor.=:=
 import scalikejdbc.interpolation.SQLSyntax

@@ -1,7 +1,7 @@
 package modelservices.users.models
 
 import modelservices.address.models.Address
-import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelations}
+import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelationShips, BaseModelRelations}
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
@@ -9,6 +9,7 @@ import modelservices.users.dao.IUserDAO
 import com.nischal.ClassToMap
 import com.nischal.db.{ModelRelation, RelationTypes}
 import modelservices.RelationDescriptions
+import modelservices.users.models
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -37,6 +38,8 @@ object User extends UserCompanionInfo
 {
 
   import com.nischal.JsonReaderWriter._
+
+  val userSeq = shapeless.TypeCase[Seq[User]]
 
   implicit val reads: Reads[User] = Json.format[User]
   implicit val writes: Writes[User] = new Writes[User]
@@ -77,6 +80,15 @@ object User extends UserCompanionInfo
         "gender" -> gender,
         "address" -> UserAddress.toJson(addresses)(UserAddress.withAddress)
       )
+    }
+  }
+
+  override def setModelRelation[A](model: models.User.Model, relation: Seq[A]): Unit =
+  {
+    relation match {
+      case Gender.genderSeq(r) => model.setGender(r.headOption)
+      case userSeq(r) => model.setFriends(r)
+      case _ => println(s"SETTER IS NOT DEFINED FOR => $relation")
     }
   }
 }
@@ -191,20 +203,10 @@ object UserRelations extends BaseModelRelations
   val GENDER, ADDRESS, FRIENDS = Value
 }
 
-object UserRelationShips extends Enumeration
+object UserRelationShips extends BaseModelRelationShips
 {
 
-  //  type UserRelations = Value
-
-  case class Val[TT, JT](
-    name: String,
-    relation: ModelRelation[User, TT, JT],
-    returnJunctionTableInfo: Boolean = false
-  ) extends super.Val
-
-  //  implicit def valueToRelationVal(x: Value) = x.asInstanceOf[Val]
-
-  val GENDER = Val[Gender, Nothing]("gender", RelationDescriptions.userGender)
+  val GENDER = Val[User, Gender, Nothing]("gender", RelationDescriptions.userGender)
 
   val ADDRESS = Val(
     "address",

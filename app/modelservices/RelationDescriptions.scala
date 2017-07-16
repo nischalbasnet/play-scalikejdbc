@@ -13,7 +13,7 @@ object RelationDescriptions
     * USER RELATIONS
     */
   val userGender = ModelRelation[User, Gender, Nothing](
-    relationType = RelationTypes.ONE_TO_MANY,
+    relationType = RelationTypes.MANY_TO_ONE,
     fromTable = User,
     fromTableKey = "gender_id",
     toTable = Gender,
@@ -41,5 +41,16 @@ object RelationDescriptions
     junctionTable = Some(Friend),
     junctionFromTableKey = Some("user_id"),
     junctionToTableKey = Some("friend_user_id")
+  )
+
+  /**
+    * GENDER RELATION
+    */
+  val genderUsers = ModelRelation[Gender, User, Nothing](
+    relationType = RelationTypes.ONE_TO_MANY,
+    fromTable = Gender,
+    fromTableKey = "gender_id",
+    toTable = User,
+    toTableKey = "gender_id"
   )
 }

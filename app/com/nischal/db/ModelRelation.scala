@@ -141,30 +141,59 @@ case class ModelRelation[FT, TT, JT](
     else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
     else toTable.defaultTable
 
-    //get proper select fields
-    val selectField: scalikejdbc.SelectSQLBuilder[TT] = if (aliasedResultName)
-      select(properToSyntax.resultAll)
-    else select(properToSyntax.*)
+    generateNoJunctionQuery(
+      toTableKey,
+      toTable,
+      properToSyntax,
+      fromTable,
+      properFromSyntax,
+      linkKey,
+      aliasedResultName,
+      getSimpleQuery
+    )
+  }
 
-    //now generate the realtion query
-    val toQuery = if (getSimpleQuery) {
+  private def generateNoJunctionQuery[TO, FROM](
+    pToTableKey: String,
+    pToTable: BaseModelCompanion[TO],
+    pToSyntax: SQLSyntaxT[TO],
+    pFromTable: BaseModelCompanion[FROM],
+    pFromSyntax: SQLSyntaxT[FROM],
+    pLinkKey: String,
+    pAliasedResultName: Boolean,
+    pGetSimpleQuery: Boolean
+  ) =
+  {
+    //get proper select fields
+    val selectField: scalikejdbc.SelectSQLBuilder[TO] = if (pAliasedResultName)
+      select(pToSyntax.resultAll)
+    else select(pToSyntax.*)
+
+    //now generate the relation query
+    val toQuery = if (pGetSimpleQuery) {
       selectField
-        .from(toTable as properToSyntax)
-        .where.eq(properToSyntax.column(toTableKey), linkKey)
+        .from(pToTable as pToSyntax)
+        .where.eq(pToSyntax.column(pToTableKey), pLinkKey)
     }
     else {
       selectField
-        .from(toTable as properToSyntax)
-        .join(fromTable as properFromSyntax)
-        .on(properToSyntax.column(toTableKey), properFromSyntax.column(fromTableKey))
-        .where.eq(properFromSyntax.column(fromTable.primaryKey), linkKey)
+        .from(pToTable as pToSyntax)
+        .join(pFromTable as pFromSyntax)
+        .on(pToSyntax.column(pToTableKey), pFromSyntax.column(fromTableKey))
+        .where.eq(pFromSyntax.column(pFromTable.primaryKey), pLinkKey)
+        .map(q => {
+          fromTable.archivedField match {
+            case Some(s: String) => q.and.isNull(pFromSyntax.column(s))
+            case _ => q
+          }
+        })
     }
 
     toQuery
       //join archived filter now
       .map(q => {
-      toTable.archivedField match {
-        case Some(s: String) => q.and.isNull(properToSyntax.column(s))
+      pToTable.archivedField match {
+        case Some(s: String) => q.and.isNull(pToSyntax.column(s))
         case _ => q
       }
     })
@@ -246,6 +275,12 @@ case class ModelRelation[FT, TT, JT](
         .join(properJunctionTable as properJunctionSyntax)
         .on(properJunctionSyntax.column(properJunctionToKey), properToSyntax.column(toTableKey))
         .where.eq(properJunctionSyntax.column(properJunctionFromKey), linkKey)
+        .map(q => {
+          properJunctionTable.archivedField match {
+            case Some(s: String) => q.and.isNull(properJunctionSyntax.column(s))
+            case _ => q
+          }
+        })
     }
     else {
       selectField
@@ -255,6 +290,19 @@ case class ModelRelation[FT, TT, JT](
         .join(fromTable as properFromSyntax)
         .on(properFromSyntax.column(fromTableKey), properJunctionSyntax.column(properJunctionFromKey))
         .where.eq(properFromSyntax.column(fromTable.primaryKey), linkKey)
+        .map(q => {
+          var conQ = properJunctionTable.archivedField match {
+            case Some(s: String) => q.and.isNull(properJunctionSyntax.column(s))
+            case _ => q
+          }
+
+          conQ = fromTable.archivedField match {
+            case Some(s: String) => conQ.and.isNull(properFromSyntax.column(s))
+            case _ => conQ
+          }
+
+          conQ
+        })
     }
 
     toQuery
@@ -266,7 +314,7 @@ case class ModelRelation[FT, TT, JT](
       }
     })
 
-    if (relationType == RelationTypes.ONE_TO_ONE) toQuery.limit(1)
+    if (relationType == RelationTypes.ONE_TO_ONE || relationType == RelationTypes.MANY_TO_ONE) toQuery.limit(1)
     else toQuery
   }
 
@@ -281,7 +329,7 @@ case class ModelRelation[FT, TT, JT](
     returnJunctionTableInfo: Boolean = false
   ): SQLSyntax =
   {
-    import scalikejdbc.com.nischal.db.SqlHelpers.createSqlSyntax
+    import scalikejdbc.nischalmod.SqlHelpers.createSqlSyntax
 
     sqls""
       .append(createSqlSyntax(s"$joinType JOIN ("))
@@ -309,5 +357,5 @@ object RelationTypes extends Enumeration
   /**
     * Relation Types
     */
-  val ONE_TO_ONE, ONE_TO_MANY, MANY_TO_MANY = Value
+  val ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY = Value
 }
