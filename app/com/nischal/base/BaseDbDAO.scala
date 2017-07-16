@@ -1,6 +1,7 @@
 package com.nischal.base
 
 import com.nischal.basecontracts.IBaseDAO
+import com.nischal.exceptions.ModelNotFound
 import play.api.libs.json.{Json, Reads}
 import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, ModelEvents}
 import scalikejdbc._
@@ -15,8 +16,6 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
   def modelEventBus: ModelEvent[MT]
 
   def modelObserver: Option[IObserveModelEvent[MT]] = None
-
-  def modelFailMatch(optionModel: Option[MT], primaryId: String): MT
 
   /**
     *
@@ -139,7 +138,14 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def getOrFail(primaryId: String)(implicit session: DBSession = AutoSession): MT =
   {
-    modelFailMatch(get(primaryId), primaryId)
+    val modelObject = get(primaryId)
+
+    if (modelObject != null && modelObject.isDefined) {
+      modelObject.get
+    }
+    else {
+      throw ModelNotFound(modelCompanion.tableName, modelCompanion.primaryKey, primaryId)
+    }
   }
 
   /**

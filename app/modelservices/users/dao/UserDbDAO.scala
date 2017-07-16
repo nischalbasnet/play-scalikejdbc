@@ -23,19 +23,6 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
   override val modelObserver = Some(UserMO())
 
   /**
-    * Needed as pattern match on generic T does not work
-    *
-    * @param optionModel
-    * @param primaryId
-    *
-    * @return
-    */
-  override def modelFailMatch(optionModel: Option[User], primaryId: String): User = optionModel match {
-    case Some(model: User) => model
-    case None => throw ModelNotFound(modelCompanion.tableName, modelCompanion.primaryKey, primaryId)
-  }
-
-  /**
     * Companion class for model object
     *
     * @return
