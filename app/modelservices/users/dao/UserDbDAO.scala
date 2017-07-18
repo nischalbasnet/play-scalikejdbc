@@ -286,15 +286,6 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {
-    //    withSQL {
-    //      select(ua.resultAll, a.resultAll)
-    //        .from(UserAddress as ua)
-    //        .join(Address as a)
-    //        .on(a.address_id, ua.address_id)
-    //        .where.eq(ua.user_id, user_id)
-    //        .and.isNull(ua.soft_deleted)
-    //    }
-
     val selectField: scalikejdbc.SelectSQLBuilder[A] = if (aliasedResultName) select(ua.resultAll, a.resultAll)
     else select(ua.*, a.*)
 

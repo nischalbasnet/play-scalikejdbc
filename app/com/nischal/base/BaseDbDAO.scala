@@ -3,8 +3,8 @@ package com.nischal.base
 import com.nischal.basecontracts.IBaseDAO
 import com.nischal.exceptions.ModelNotFound
 import play.api.libs.json.{Json, Reads}
-import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, ModelEvents}
 import scalikejdbc._
+import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, ModelEvents}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -128,6 +128,36 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
          """
 
     fullQuery
+  }
+
+  /**
+    * Get the specified relation
+    *
+    * @param linkId
+    * @param relationDetail
+    * @param relationCompanion
+    * @param session
+    * @tparam R
+    *
+    * @return
+    */
+  def getRelation[R](
+    linkId: String,
+    relationDetail: RelationDetail[MT, R, _],
+    relationCompanion: BaseModelCompanion[R]
+  )(implicit session: DBSession = AutoSession): List[R] =
+  {
+    val toTable = relationCompanion.syntax("ft")
+    val query = relationDetail.relation.getQuery(
+      linkId,
+      toSyntax = Some(toTable)
+    )
+
+    withSQL {
+      query
+    }.map(relationCompanion.fromSqlResult(toTable.resultName)(_))
+      .toList()
+      .apply()
   }
 
   /**

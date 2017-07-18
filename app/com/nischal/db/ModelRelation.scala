@@ -47,7 +47,7 @@ case class ModelRelation[FT, TT, JT](
   /**
     * Get the query
     *
-    * @param linkKey
+    * @param linkId
     * @param fromSyntax
     * @param toSyntax
     * @param junctionSyntax
@@ -57,13 +57,13 @@ case class ModelRelation[FT, TT, JT](
     * @return
     */
   def getQuery(
-    linkKey: String,
+    linkId: String,
     fromSyntax: Option[SQLSyntaxT[FT]] = None,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     junctionSyntax: Option[SQLSyntaxT[JT]] = None,
     aliasedResultName: Boolean = true,
     returnJunctionTableInfo: Boolean = false,
-    getSimpleQuery: Boolean = true
+    dontJoinFromTable: Boolean = true
   ): scalikejdbc.SQLBuilder[TT] =
   {
     if (_overriddenQuery.isDefined) {
@@ -71,22 +71,22 @@ case class ModelRelation[FT, TT, JT](
     }
     else if (junctionTable.isDefined) {
       defaultJunctionQuery(
-        linkKey,
+        linkId,
         fromSyntax,
         toSyntax,
         junctionSyntax,
         aliasedResultName,
         returnJunctionTableInfo,
-        getSimpleQuery
+        dontJoinFromTable
       )
     }
     else {
       defaultNoJunctionQuery(
-        linkKey,
+        linkId,
         fromSyntax,
         toSyntax,
         aliasedResultName,
-        getSimpleQuery
+        dontJoinFromTable
       )
     }
   }
@@ -94,30 +94,30 @@ case class ModelRelation[FT, TT, JT](
   /**
     * Query on to table only
     *
-    * @param linkKey
+    * @param linkId
     * @param toSyntax
     * @param aliasedResultName
     *
     * @return
     */
   private def defaultNoJunctionQuerySimple(
-    linkKey: String,
+    linkId: String,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[TT] =
   {
     defaultNoJunctionQuery(
-      linkKey = linkKey,
+      linkId = linkId,
       toSyntax = toSyntax,
       aliasedResultName = aliasedResultName,
-      getSimpleQuery = true
+      dontJoinFromTable = true
     )
   }
 
   /**
     * Query on to table join on from without junction table
     *
-    * @param linkKey
+    * @param linkId
     * @param fromSyntax
     * @param toSyntax
     * @param aliasedResultName
@@ -125,11 +125,11 @@ case class ModelRelation[FT, TT, JT](
     * @return
     */
   private def defaultNoJunctionQuery(
-    linkKey: String,
+    linkId: String,
     fromSyntax: Option[SQLSyntaxT[FT]] = None,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     aliasedResultName: Boolean = true,
-    getSimpleQuery: Boolean = false
+    dontJoinFromTable: Boolean = false
   ): scalikejdbc.SQLBuilder[TT] =
   {
     //get proper from table info
@@ -147,9 +147,9 @@ case class ModelRelation[FT, TT, JT](
       properToSyntax,
       fromTable,
       properFromSyntax,
-      linkKey,
+      linkId,
       aliasedResultName,
-      getSimpleQuery
+      dontJoinFromTable
     )
   }
 
@@ -161,7 +161,7 @@ case class ModelRelation[FT, TT, JT](
     pFromSyntax: SQLSyntaxT[FROM],
     pLinkKey: String,
     pAliasedResultName: Boolean,
-    pGetSimpleQuery: Boolean
+    pDontJoinFromTable: Boolean
   ) =
   {
     //get proper select fields
@@ -170,7 +170,7 @@ case class ModelRelation[FT, TT, JT](
     else select(pToSyntax.*)
 
     //now generate the relation query
-    val toQuery = if (pGetSimpleQuery) {
+    val toQuery = if (pDontJoinFromTable) {
       selectField
         .from(pToTable as pToSyntax)
         .where.eq(pToSyntax.column(pToTableKey), pLinkKey)
@@ -203,7 +203,7 @@ case class ModelRelation[FT, TT, JT](
   }
 
   private def defaultJunctionQuerySimple(
-    linkKey: String,
+    linkId: String,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     junctionSyntax: Option[SQLSyntaxT[JT]] = None,
     aliasedResultName: Boolean = true,
@@ -211,19 +211,19 @@ case class ModelRelation[FT, TT, JT](
   ): scalikejdbc.SQLBuilder[TT] =
   {
     defaultJunctionQuery(
-      linkKey = linkKey,
+      linkId = linkId,
       toSyntax = toSyntax,
       junctionSyntax = junctionSyntax,
       aliasedResultName = aliasedResultName,
       returnJunctionTableInfo = returnJunctionTableInfo,
-      getSimpleQuery = true
+      joinFromTable = true
     )
   }
 
   /**
     * Default query with junction table
     *
-    * @param linkKey
+    * @param linkId
     * @param fromSyntax
     * @param toSyntax
     * @param junctionSyntax
@@ -233,13 +233,13 @@ case class ModelRelation[FT, TT, JT](
     * @return
     */
   private def defaultJunctionQuery(
-    linkKey: String,
+    linkId: String,
     fromSyntax: Option[SQLSyntaxT[FT]] = None,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     junctionSyntax: Option[SQLSyntaxT[JT]] = None,
     aliasedResultName: Boolean = true,
     returnJunctionTableInfo: Boolean = false,
-    getSimpleQuery: Boolean = false
+    joinFromTable: Boolean = false
   ): scalikejdbc.SQLBuilder[TT] =
   {
     //get proper junction table info
@@ -269,12 +269,12 @@ case class ModelRelation[FT, TT, JT](
     }
 
     //generate the select query
-    val toQuery = if (getSimpleQuery) {
+    val toQuery = if (joinFromTable) {
       selectField
         .from(toTable as properToSyntax)
         .join(properJunctionTable as properJunctionSyntax)
         .on(properJunctionSyntax.column(properJunctionToKey), properToSyntax.column(toTableKey))
-        .where.eq(properJunctionSyntax.column(properJunctionFromKey), linkKey)
+        .where.eq(properJunctionSyntax.column(properJunctionFromKey), linkId)
         .map(q => {
           properJunctionTable.archivedField match {
             case Some(s: String) => q.and.isNull(properJunctionSyntax.column(s))
@@ -289,7 +289,7 @@ case class ModelRelation[FT, TT, JT](
         .on(properJunctionSyntax.column(properJunctionToKey), properToSyntax.column(toTableKey))
         .join(fromTable as properFromSyntax)
         .on(properFromSyntax.column(fromTableKey), properJunctionSyntax.column(properJunctionFromKey))
-        .where.eq(properFromSyntax.column(fromTable.primaryKey), linkKey)
+        .where.eq(properFromSyntax.column(fromTable.primaryKey), linkId)
         .map(q => {
           var conQ = properJunctionTable.archivedField match {
             case Some(s: String) => q.and.isNull(properJunctionSyntax.column(s))
@@ -321,7 +321,7 @@ case class ModelRelation[FT, TT, JT](
   def getJoinSubQuery(
     joinType: String,
     subQueryAlias: String,
-    linkKey: String,
+    linkId: String,
     fromSyntax: Option[SQLSyntaxT[FT]] = None,
     toSyntax: Option[SQLSyntaxT[TT]] = None,
     junctionSyntax: Option[SQLSyntaxT[JT]] = None,
@@ -335,13 +335,13 @@ case class ModelRelation[FT, TT, JT](
       .append(createSqlSyntax(s"$joinType JOIN ("))
       .append(
         getQuery(
-          linkKey = linkKey,
+          linkId = linkId,
           fromSyntax = fromSyntax,
           toSyntax = toSyntax,
           junctionSyntax = junctionSyntax,
           aliasedResultName = aliasedResultName,
           returnJunctionTableInfo = returnJunctionTableInfo,
-          getSimpleQuery = false
+          dontJoinFromTable = false
         ).toSQLSyntax
       )
       .append(createSqlSyntax(s") $subQueryAlias"))
