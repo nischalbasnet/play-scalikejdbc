@@ -61,7 +61,10 @@ trait UserAddressCompanionInfo extends BaseModelCompanion[UserAddress]
 
   override val archivedField: Option[String] = Some("soft_deleted")
 
-  override def fromSqlResult(rn: scalikejdbc.ResultName[UserAddress])(rs: WrappedResultSet): UserAddress = autoConstruct(rs, rn)
+  override def fromSqlResult(
+    rs: WrappedResultSet,
+    rn: scalikejdbc.ResultName[UserAddress] = defaultTable.resultName
+  ): UserAddress = autoConstruct(rs, rn)
 }
 
 /**

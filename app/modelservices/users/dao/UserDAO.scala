@@ -171,11 +171,6 @@ class UserDAO @Inject()(
     userDbDAO.save(user_id, updateForm)
   }
 
-  def getWithOld(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
-  {
-    userDbDAO.getWithOld(user_id, relations)
-  }
-
   def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession): Option[User] =
   {
     userDbDAO.getWith(user_id, relations)

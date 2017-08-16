@@ -28,7 +28,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     val table = modelCompanion.syntax("tt")
 
     val query = queryGet(primaryId)
-      .map(modelCompanion.fromSqlResult(table.resultName)(_))
+      .map(modelCompanion.fromSqlResult(_, table.resultName))
       .single()
       .apply()
 
@@ -51,7 +51,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     val fullQuery = queryGetWithRelations(primaryId, relations)
 
     val modelInfo = fullQuery.map(rs => {
-      val mdl: MT = modelCompanion.fromSqlResult(table.resultName)(rs)
+      val mdl: MT = modelCompanion.fromSqlResult(rs, table.resultName)
 
       //set relation value from result set
       relations.foreach(r => {
@@ -141,9 +141,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     *
     * @return
     */
-  def getRelation[R](
+  def getRelation[R, JT](
     linkId: String,
-    relationDetail: RelationDetail[MT, R, _],
+    relationDetail: RelationDetail[MT, R, JT],
     relationCompanion: BaseModelCompanion[R]
   )(implicit session: DBSession = AutoSession): List[R] =
   {
@@ -155,7 +155,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
 
     withSQL {
       query
-    }.map(relationCompanion.fromSqlResult(toTable.resultName)(_))
+    }.map(relationCompanion.fromSqlResult(_, toTable.resultName))
       .toList()
       .apply()
   }
@@ -190,7 +190,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     val table = modelCompanion.syntax("tt")
 
     val query = queryGetMany(primaryIds)
-      .map(modelCompanion.fromSqlResult(table.resultName)(_))
+      .map(modelCompanion.fromSqlResult(_, table.resultName))
       .collection
       .apply()
 

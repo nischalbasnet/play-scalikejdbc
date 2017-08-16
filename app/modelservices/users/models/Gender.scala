@@ -53,10 +53,11 @@ trait GenderCompanionInfo extends BaseModelCompanion[Gender]
 
   override val archivedField: Option[String] = Some("soft_deleted")
 
-  override def fromSqlResult(rn: scalikejdbc.ResultName[Gender])(rs: WrappedResultSet): Gender =
-  {
-    autoConstruct(rs, rn)
-  }
+  override def fromSqlResult(
+    rs: WrappedResultSet,
+    rn: scalikejdbc.ResultName[Gender] = defaultTable.resultName
+  ): Gender = autoConstruct(rs, rn)
+
 }
 
 object GenderRelationShips extends BaseModelRelationShips

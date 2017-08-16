@@ -1,5 +1,6 @@
 package com.nischal.basecontracts
 
+import com.nischal.base.{BaseModelCompanion, RelationDetail}
 import scalikejdbc.DBSession
 
 /**
@@ -15,6 +16,12 @@ trait IBaseReadDAO[MT, PT]
   def get(primaryId: PT)(implicit session: DBSession): Option[MT]
 
   def getMany(primaryIds: Seq[PT])(implicit session: DBSession): Seq[MT]
+
+//  def getRelation[R, JT](
+//    linkId: String,
+//    relationDetail: RelationDetail[MT, R, JT],
+//    relationCompanion: BaseModelCompanion[R]
+//  )(implicit session: DBSession): List[R]
 
   def getOrFail(primaryId: PT)(implicit session: DBSession): MT
 }

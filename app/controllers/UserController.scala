@@ -119,6 +119,15 @@ class UserController @Inject()(
     }
   }
 
+  def getGender(user_id: String) = Action {
+    userService.get(user_id) match {
+      case Some(u: User) => Ok(
+        jsonOk(Json.toJson(u.gender))
+      )
+      case _ => NotFound(jsonFail(message = "User not found"))
+    }
+  }
+
   /**
     * Get user friends
     *

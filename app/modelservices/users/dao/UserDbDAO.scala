@@ -29,104 +29,6 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   override val modelCompanion = User
 
-  def getWithOld(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User =
-  {
-    val user = User.defaultTable
-
-    var selectFields = sqls"SELECT ${user.resultAll}"
-    var relationJoins = sqls""
-    val userFilter =
-      sqls"""
-            WHERE ${user.user_id} = $user_id
-            AND ${user.soft_deleted} ISNULL
-            GROUP BY ${user.user_id}
-          """
-
-    //load the relations
-    relations.foreach {
-      case UserRelations.ADDRESS => {
-        val a = Address.defaultTable
-        val ua = UserAddress.defaultTable
-
-        //add to select field
-        selectFields = selectFields.append(
-          sqls""",json_agg(row_to_json(ua.*)) as address """
-        )
-        relationJoins = relationJoins.append(
-          sqls"""
-                LEFT JOIN (
-                ${queryUserAddresses(user_id, a, ua, aliasedResultName = false).toSQLSyntax}
-                ) ua
-                ON ua.user_id = ${user.user_id}
-              """
-        )
-      }
-      case UserRelations.FRIENDS => {
-        val friends = Friend.defaultTable
-        //        queryUserFriends(user_id, user, friends)
-        //add to select field
-        selectFields = selectFields.append(
-          sqls""",json_agg(row_to_json(f.*)) as friends """
-        )
-        relationJoins = relationJoins.append(
-          sqls"""
-                LEFT JOIN (
-                ${queryUserFriends(user_id, user, friends, aliasedResultName = false).toSQLSyntax}
-                ) f
-                ON f.soft_deleted ISNULL
-              """
-        )
-      }
-      case UserRelations.GENDER => {
-        val gender = Gender.defaultTable
-        queryUserGender(user_id, gender, user)
-        //add to select field
-        selectFields = selectFields.append(
-          sqls""",json_agg(row_to_json(g.*)) as gender """
-        )
-
-        relationJoins = relationJoins.append(
-          sqls"""
-                LEFT JOIN (
-                ${queryUserGender(user_id, gender, user, aliasedResultName = false).toSQLSyntax}
-                ) g
-                ON g.gender_id = ${user.gender_id}
-              """
-        )
-      }
-    }
-
-    val fullQuery =
-      sql"""
-           $selectFields
-            FROM ${User as user}
-              $relationJoins
-            $userFilter
-         """
-
-    val userInfo = fullQuery.map(rs => {
-      val userAddress = Json.parse(rs.string("address")).as[Seq[UserAddress]]
-      val address = Json.parse(rs.string("address")).as[Seq[Address]]
-      //fill address to user address
-      val finalAddr = userAddress.map(ua => {
-        val addr = address.find(_.address_id == ua.address_id)
-        if (addr.isDefined) ua.setAddress(addr.get)
-        ua
-      })
-
-      val friends = Json.parse(rs.string("friends")).as[Seq[User]]
-      val gender = Json.parse(rs.string("gender")).as[Seq[Gender]]
-
-      val usr: User = User.fromSqlResult(user.resultName)(rs)
-      usr.setAddresses(finalAddr)
-        .setFriends(friends)
-        .setGender(gender.headOption)
-      usr
-    }).first().apply()
-
-    userInfo.get
-  }
-
   /**
     * Change modelservices.users password
     *
@@ -175,27 +77,29 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
           mobile_number.map(sqls.eq(u.mobile_number, _)),
           gender_id.map(sqls.eq(u.gender_id, _))
         ))
-    }.map(User.fromSqlResult(u.resultName)(_))
+    }.map(User.fromSqlResult(_))
       .list().apply()
   }
 
   /**
     * Get modelservices.users gender
     *
-    * @param user_id
+    * @param user_gender_id
     * @param session
     *
     * @return
     */
-  def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender] =
+  def getUsersGender(user_gender_id: String)(implicit session: DBSession): Option[Gender] =
   {
     val g = Gender.defaultTable
     val u = User.defaultTable
 
-    withSQL {
-      queryUserGender(user_id, g, u)
-    }.map(Gender.fromSqlResult(g.resultName)(_))
-      .single().apply()
+    //    withSQL {
+    //      queryUserGender(user_id, g, u)
+    //    }.map(Gender.fromSqlResult(g.resultName)(_))
+    //      .single().apply()
+
+    getRelation[Gender, Nothing](user_gender_id, UserRelationShips.GENDER, Gender).headOption
   }
 
   /**
@@ -209,8 +113,8 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   private def queryUserGender[A](
     user_id: String,
-    g: Gender.SQLSyntaxT[Gender],
-    u: User.SQLSyntaxT[User],
+    g: Gender.SQLSyntaxT[Gender] = Gender.defaultTable,
+    u: User.SQLSyntaxT[User] = User.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {
@@ -231,19 +135,13 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
   {
-    val f = Friend.defaultTable
-    val u = User.defaultTable
-
-    withSQL {
-      queryUserFriends(user_id, u, f)
-    }.map(User.fromSqlResult(u.resultName)(_))
-      .list().apply()
+    getRelation[User, Friend](user_id, UserRelationShips.FRIENDS, User)
   }
 
   private def queryUserFriends[A](
     user_id: String,
-    u: User.SQLSyntaxT[User],
-    f: Friend.SQLSyntaxT[Friend],
+    u: User.SQLSyntaxT[User] = User.defaultTable,
+    f: Friend.SQLSyntaxT[Friend] = Friend.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {
@@ -263,26 +161,25 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
   {
-    val a = Address.defaultTable
-    val ua = UserAddress.defaultTable
 
     withSQL {
-      queryUserAddresses(user_id, a, ua)
+      queryUserAddresses(user_id)
     }.map(rs => {
-      val userAddress = UserAddress.fromSqlResult(ua.resultName)(rs)
-      val address = Address.fromSqlResult(a.resultName)(rs)
+      val userAddress = UserAddress.fromSqlResult(rs)
+      val address = Address.fromSqlResult(rs)
       userAddress.setAddress(address)
 
       userAddress
     }).list()
       .apply()
 
+    //        getRelation[Address, UserAddress](user_id, UserRelationShips.ADDRESS, Address)
   }
 
   private def queryUserAddresses[A](
     user_id: String,
-    a: Address.SQLSyntaxT[Address],
-    ua: UserAddress.SQLSyntaxT[UserAddress],
+    a: Address.SQLSyntaxT[Address] = Address.defaultTable,
+    ua: UserAddress.SQLSyntaxT[UserAddress] = UserAddress.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {

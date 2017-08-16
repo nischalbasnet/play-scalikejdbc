@@ -36,5 +36,8 @@ trait FriendCompanionInfo extends BaseModelCompanion[Friend]
 
   override val archivedField: Option[String] = Some("soft_deleted")
 
-  override def fromSqlResult(rn: scalikejdbc.ResultName[Friend])(rs: WrappedResultSet): Friend = autoConstruct(rs, rn)
+  override def fromSqlResult(
+    rs: WrappedResultSet,
+    rn: scalikejdbc.ResultName[Friend] = defaultTable.resultName
+  ): Friend = autoConstruct(rs, rn)
 }

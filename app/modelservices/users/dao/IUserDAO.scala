@@ -15,8 +15,6 @@ trait IUserDAO extends IUserReadDAO with IUserWriteDAO
 trait IUserReadDAO extends IBaseReadDAO[User, String]
 {
 
-  def getWithOld(user_id: String, relations: Seq[UserRelations])(implicit session: DBSession): User
-
   def getWith(primaryId: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession): Option[User]
 
   /**

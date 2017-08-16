@@ -106,7 +106,10 @@ trait UserCompanionInfo extends BaseModelCompanion[User]
 
   override val archivedField: Option[String] = Some("soft_deleted")
 
-  override def fromSqlResult(rn: scalikejdbc.ResultName[User])(rs: WrappedResultSet): User = autoConstruct(rs, rn)
+  override def fromSqlResult(
+    rs: WrappedResultSet,
+    rn: scalikejdbc.ResultName[User] = defaultTable.resultName
+  ): User = autoConstruct(rs, rn)
 }
 
 /**
@@ -127,7 +130,10 @@ trait UserRelationDefinitions
   def gender()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Option[Gender] =
   {
     if (_genderSetOnly == null) {
-      _genderSetOnly = userDAO.getUsersGender(user_id)
+      _genderSetOnly = gender_id match {
+        case Some(id: String) => userDAO.getUsersGender(id)
+        case _ => None
+      }
     }
     _genderSetOnly
   }
@@ -165,7 +171,7 @@ trait UserRelationDefinitions
     *
     * @param gender
     */
-  def setGender(gender: Option[Gender]): User =
+  protected def setGender(gender: Option[Gender]): User =
   {
     _genderSetOnly = gender
     this
@@ -176,7 +182,7 @@ trait UserRelationDefinitions
     *
     * @param addresses
     */
-  def setAddresses(addresses: Seq[UserAddress]): User =
+  protected def setAddresses(addresses: Seq[UserAddress]): User =
   {
     _addressesSetOnly = addresses
     this
@@ -187,7 +193,7 @@ trait UserRelationDefinitions
     *
     * @param friends
     */
-  def setFriends(friends: Seq[User]): User =
+  protected def setFriends(friends: Seq[User]): User =
   {
     _friendsSetOnly = friends
     this
@@ -208,7 +214,7 @@ object UserRelationShips extends BaseModelRelationShips
 
   val GENDER = Val[User, Gender, Nothing]("gender", RelationDescriptions.userGender)
 
-  val ADDRESS = Val(
+  val ADDRESS = Val[User, Address, UserAddress](
     "address",
     RelationDescriptions.userAddresses,
     returnJunctionTableInfo = true

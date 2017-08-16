@@ -41,7 +41,7 @@ case class ModelRelation[FT, TT, JT](
 
   def defaultMapper(rs: WrappedResultSet): TT =
   {
-    toTable.fromSqlResult(toTable.defaultTable.resultName)(rs)
+    toTable.fromSqlResult(rs, toTable.defaultTable.resultName)
   }
 
   /**

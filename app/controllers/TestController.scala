@@ -78,7 +78,7 @@ class TestController @Inject()(
 
 
     val userInfo = fullQuery.map(rs => {
-      val usr: User = User.fromSqlResult(user.resultName)(rs)
+      val usr: User = User.fromSqlResult(rs, user.resultName)
 
       //set relation value from result set
       relations.foreach(r => {
@@ -88,27 +88,13 @@ class TestController @Inject()(
         val relationValueSet = Json.parse(rs.string(r.name)).as[Set[tpe.Model]](Reads.set(tpe.reads))
         println(relationValueSet)
 
-        setModelRelation(usr, relationValueSet.toSeq)
+        User.setModelRelation(usr, relationValueSet.toSeq)
       })
 
       usr
     }).first().apply()
 
     userInfo.get
-  }
-
-  import shapeless._
-
-  val genderSeq = TypeCase[Seq[Gender]]
-  val userSeq = TypeCase[Seq[User]]
-
-  def setModelRelation[A](model: User, relation: Seq[A]): Unit =
-  {
-    relation match {
-      case genderSeq(r) => model.setGender(r.headOption)
-      case userSeq(r) => model.setFriends(r)
-      case _ => println(s"SETTER IS NOT DEFINED FOR => $relation")
-    }
   }
 
   def queryGetWith(
@@ -191,8 +177,8 @@ class TestController @Inject()(
         """
 
     val address = sql"$genderSubQ".map(rs => {
-      val userAddress = UserAddress.fromSqlResult(ua.resultName)(rs)
-      val address = Address.fromSqlResult(a.resultName)(rs)
+      val userAddress = UserAddress.fromSqlResult(rs, ua.resultName)
+      val address = Address.fromSqlResult(rs, a.resultName)
       userAddress.setAddress(address)
 
       userAddress

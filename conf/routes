@@ -11,6 +11,7 @@ GET          /test/relation                                     controllers.Test
 # User Route
 GET          /users/:user_id                                    controllers.UserController.get(user_id: String)
 GET          /users/change_password/:email/:new_password        controllers.UserController.changePassword(email: String, new_password: String)
+GET          /users/:user_id/gender                             controllers.UserController.getGender(user_id: String)
 GET          /users/:user_id/friends                            controllers.UserController.getFriends(user_id: String)
 GET          /users/:user_id/addresses                          controllers.UserController.getAddresses(user_id: String)
 POST         /users                                             controllers.UserController.create()
