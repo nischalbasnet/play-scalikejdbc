@@ -2,14 +2,13 @@ package com.nischal.base
 
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc._
-import modelservices.users.models.User
 
 /**
   * Created by nbasnet on 6/4/17.
   */
 abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
 {
-  type SQLSyntaxT[MT] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MT], MT]
+  type SQLSyntaxT[MO] = scalikejdbc.QuerySQLSyntaxProvider[scalikejdbc.SQLSyntaxSupport[MO], MO]
   type Model = MT
 
   implicit def reads: Reads[Model]

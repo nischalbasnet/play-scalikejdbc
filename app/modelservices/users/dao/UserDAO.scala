@@ -16,7 +16,9 @@ class UserDAO @Inject()(
   userDbDAO: IUserDbDAO
 ) extends IUserDAO
 {
-  val writeSession: DBSession = NamedAutoSession("write")
+  val defaultSession: DBSession = userDbDAO.defaultSession
+
+  val writeSession: DBSession = NamedAutoSession('write)
 
   /**
     * Get User
@@ -26,7 +28,7 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def get(primaryId: String)(implicit session: DBSession): Option[User] =
+  def get(primaryId: String)(implicit session: DBSession = defaultSession): Option[User] =
   {
     userDbDAO.get(primaryId)
   }
@@ -39,7 +41,7 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def getMany(primaryIds: Seq[String])(implicit session: DBSession): Seq[User] =
+  def getMany(primaryIds: Seq[String])(implicit session: DBSession = defaultSession): Seq[User] =
   {
     userDbDAO.getMany(primaryIds)
   }
@@ -52,37 +54,9 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def getOrFail(primaryId: String)(implicit session: DBSession): User =
+  def getOrFail(primaryId: String)(implicit session: DBSession = defaultSession): User =
   {
     userDbDAO.getOrFail(primaryId)
-  }
-
-  /**
-    * Save User
-    *
-    * @param model
-    * @param primaryId
-    * @param session
-    *
-    * @return
-    */
-  def save(model: User, primaryId: Option[String])(implicit session: DBSession = writeSession): String =
-  {
-    userDbDAO.save(model, primaryId)
-  }
-
-  /**
-    * Save Users
-    *
-    * @param model
-    * @param primaryId
-    * @param session
-    *
-    * @return
-    */
-  def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession): Seq[String] =
-  {
-    userDbDAO.saveMany(model, primaryId)
   }
 
   /**
@@ -95,7 +69,7 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int =
+  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession = defaultSession): Int =
   {
     userDbDAO.changeUsersPassword(user, newPassword, salt)
   }
@@ -131,7 +105,7 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender] =
+  def getUsersGender(user_id: String)(implicit session: DBSession = defaultSession): Option[Gender] =
   {
     userDbDAO.getUsersGender(user_id)
   }
@@ -143,7 +117,7 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  override def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
+  override def getFriends(user_id: String)(implicit session: DBSession = defaultSession): Seq[User] =
   {
     userDbDAO.getFriends(user_id)
   }
@@ -154,9 +128,24 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
+  def getAddresses(user_id: String)(implicit session: DBSession = defaultSession): Seq[UserAddress] =
   {
     userDbDAO.getAddresses(user_id)
+  }
+
+
+  /**
+    * Save User
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
+  def save(model: User, primaryId: Option[String])(implicit session: DBSession = writeSession): String =
+  {
+    userDbDAO.save(model, primaryId)
   }
 
   /**
@@ -166,12 +155,26 @@ class UserDAO @Inject()(
     *
     * @return
     */
-  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
+  def saveForm(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession = writeSession): Int =
   {
-    userDbDAO.save(user_id, updateForm)
+    userDbDAO.saveForm(user_id, updateForm)
   }
 
-  def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession): Option[User] =
+  /**
+    * Save Users
+    *
+    * @param model
+    * @param primaryId
+    * @param session
+    *
+    * @return
+    */
+  def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession = defaultSession): Seq[String] =
+  {
+    userDbDAO.saveMany(model, primaryId)
+  }
+
+  def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession = defaultSession): Option[User] =
   {
     userDbDAO.getWith(user_id, relations)
   }

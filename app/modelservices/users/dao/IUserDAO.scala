@@ -79,7 +79,7 @@ trait IUserWriteDAO extends IBaseWriteDAO[User, String]
     */
   def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int
 
-  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int
+  def saveForm(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int
 }
 
 trait IUserDbDAO extends IUserReadDAO with IUserWriteDAO

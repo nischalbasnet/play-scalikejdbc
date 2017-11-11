@@ -19,8 +19,10 @@ import modelservices.users.models.{User, UserAddress, UserUpdateForm}
 @Singleton
 class UserController @Inject()(
   userService: IUserService,
+  cc: ControllerComponents
+)(
   implicit val userDAO: IUserDAO
-) extends BaseController
+) extends BaseController(cc)
 {
   /**
     * Get user

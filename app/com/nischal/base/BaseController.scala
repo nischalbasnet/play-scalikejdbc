@@ -3,14 +3,14 @@ package com.nischal.base
 import com.nischal.base.Success.Success
 import play.api.data.Form
 import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.mvc.Controller
+import play.api.mvc._
 
-import scala.xml.{Elem, NodeBuffer}
+import scala.xml.Elem
 
 /**
   * Created by nbasnet on 6/4/17.
   */
-abstract class BaseController extends Controller
+abstract class BaseController(cc: ControllerComponents) extends AbstractController(cc)
 {
   val fakeId = "fake_id_used_for_creating_new_record_12345678910"
 

@@ -13,27 +13,29 @@ class AddressDAO @Inject()(
   addressDbDAO: IAddressDbDAO
 ) extends IAddressDAO
 {
-  def get(primaryId: String)(implicit session: DBSession): Option[Address] =
+  val defaultSession: DBSession = addressDbDAO.defaultSession
+
+  def get(primaryId: String)(implicit session: DBSession = defaultSession): Option[Address] =
   {
     addressDbDAO.get(primaryId)
   }
 
-  def getMany(primaryIds: Seq[String])(implicit session: DBSession): Seq[Address] =
+  def getMany(primaryIds: Seq[String])(implicit session: DBSession = defaultSession): Seq[Address] =
   {
     addressDbDAO.getMany(primaryIds)
   }
 
-  def getOrFail(primaryId: String)(implicit session: DBSession): Address =
+  def getOrFail(primaryId: String)(implicit session: DBSession = defaultSession): Address =
   {
     addressDbDAO.getOrFail(primaryId)
   }
 
-  def save(model: Address, primaryId: Option[String])(implicit session: DBSession): String =
+  def save(model: Address, primaryId: Option[String])(implicit session: DBSession = defaultSession): String =
   {
     addressDbDAO.save(model, primaryId)
   }
 
-  def saveMany(model: Seq[Address], primaryId: Seq[String])(implicit session: DBSession): Seq[String] =
+  def saveMany(model: Seq[Address], primaryId: Seq[String])(implicit session: DBSession = defaultSession): Seq[String] =
   {
     addressDbDAO.saveMany(model, primaryId)
   }

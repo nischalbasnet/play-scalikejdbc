@@ -39,7 +39,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     *
     * @return
     */
-  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int =
+  def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession = defaultSession): Int =
   {
     user.setPassword(newPassword).setSalt(salt)
 
@@ -89,7 +89,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     *
     * @return
     */
-  def getUsersGender(user_gender_id: String)(implicit session: DBSession): Option[Gender] =
+  def getUsersGender(user_gender_id: String)(implicit session: DBSession = defaultSession): Option[Gender] =
   {
     val g = Gender.defaultTable
     val u = User.defaultTable
@@ -133,7 +133,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     *
     * @return
     */
-  def getFriends(user_id: String)(implicit session: DBSession): Seq[User] =
+  def getFriends(user_id: String)(implicit session: DBSession = defaultSession): Seq[User] =
   {
     getRelation[User, Friend](user_id, UserRelationShips.FRIENDS, User)
   }
@@ -159,7 +159,7 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     *
     * @return
     */
-  def getAddresses(user_id: String)(implicit session: DBSession): Seq[UserAddress] =
+  def getAddresses(user_id: String)(implicit session: DBSession = defaultSession): Seq[UserAddress] =
   {
 
     withSQL {
@@ -201,8 +201,8 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     *
     * @return
     */
-  def save(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
+  def saveForm(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession): Int =
   {
-    performUpdate(user_id, updateForm.updateValuesMap)
+    performUpdate(user_id, updateForm.updateValuesMap())
   }
 }

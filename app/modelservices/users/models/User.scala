@@ -6,8 +6,6 @@ import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
 import modelservices.users.dao.IUserDAO
-import com.nischal.ClassToMap
-import com.nischal.db.{ModelRelation, RelationTypes}
 import modelservices.RelationDescriptions
 import modelservices.users.models
 

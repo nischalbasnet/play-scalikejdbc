@@ -13,6 +13,8 @@ trait IBaseDAO[MT, PT] extends IBaseReadDAO[MT, PT] with IBaseWriteDAO[MT, PT]
 
 trait IBaseReadDAO[MT, PT]
 {
+  def defaultSession: DBSession
+
   def get(primaryId: PT)(implicit session: DBSession): Option[MT]
 
   def getMany(primaryIds: Seq[PT])(implicit session: DBSession): Seq[MT]

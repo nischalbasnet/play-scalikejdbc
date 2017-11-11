@@ -4,6 +4,9 @@ import org.joda.time.DateTime
 import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc.{ParameterBinder, autoNamedValues}
 
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
 /**
   * Created by nbasnet on 6/5/17.
   */
@@ -48,7 +51,7 @@ trait UserATC
     insertMap
   }
 
-  def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
+  def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap()
 
   def setFirstName(inFirstName: String) =
   {
@@ -159,7 +162,13 @@ case class UserUpdateForm(
   var soft_deleted: Option[DateTime] = None
 )
 {
-  def updateValuesMap: Map[SQLSyntax, ParameterBinder] =
+  private val _nullValues: ListBuffer[String] = ListBuffer()
+
+  def setNullValue(value: String) = _nullValues.append(value)
+
+  def setNullValue(values: Seq[String]) = _nullValues.appendAll(values)
+
+  def updateValuesMap(setNull: Seq[String] = _nullValues): Map[SQLSyntax, ParameterBinder] =
   {
     val table = User.column
     var updateMap: Map[SQLSyntax, ParameterBinder] = Map.empty

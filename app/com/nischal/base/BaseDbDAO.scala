@@ -11,6 +11,8 @@ import services.events.{IObserveModelEvent, ModelEvent, ModelEventPayload, Model
   */
 abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
 {
+  val defaultSession: DBSession = AutoSession
+
   def modelCompanion: BaseModelCompanion[MT]
 
   def modelEventBus: ModelEvent[MT]
@@ -20,10 +22,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
   /**
     *
     * @param primaryId
-    *
     * @return
     */
-  def get(primaryId: String)(implicit session: DBSession = AutoSession): Option[MT] =
+  def get(primaryId: String)(implicit session: DBSession = defaultSession): Option[MT] =
   {
     val table = modelCompanion.syntax("tt")
 
@@ -41,10 +42,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param primaryId
     * @param relations
     * @param session
-    *
     * @return
     */
-  def getWith(primaryId: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession = AutoSession): Option[MT] =
+  def getWith(primaryId: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession = defaultSession): Option[MT] =
   {
     val table = modelCompanion.syntax("tt")
 
@@ -73,13 +73,12 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param primaryId
     * @param relations
     * @param session
-    *
     * @return
     */
   private def queryGetWithRelations(
     primaryId: String,
     relations: Seq[RelationDetail[_, _, _]]
-  )(implicit session: DBSession): SQL[Nothing, NoExtractor] =
+  )(implicit session: DBSession = defaultSession): SQL[Nothing, NoExtractor] =
   {
     val table = modelCompanion.syntax("tt")
 
@@ -138,14 +137,13 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param relationCompanion
     * @param session
     * @tparam R
-    *
     * @return
     */
   def getRelation[R, JT](
     linkId: String,
     relationDetail: RelationDetail[MT, R, JT],
     relationCompanion: BaseModelCompanion[R]
-  )(implicit session: DBSession = AutoSession): List[R] =
+  )(implicit session: DBSession = defaultSession): List[R] =
   {
     val toTable = relationCompanion.syntax("ft")
     val query = relationDetail.relation.getQuery(
@@ -163,10 +161,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
   /**
     *
     * @param primaryId
-    *
     * @return
     */
-  def getOrFail(primaryId: String)(implicit session: DBSession = AutoSession): MT =
+  def getOrFail(primaryId: String)(implicit session: DBSession = defaultSession): MT =
   {
     val modelObject = get(primaryId)
 
@@ -182,16 +179,15 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * Get Many
     *
     * @param primaryIds
-    *
     * @return
     */
-  def getMany(primaryIds: Seq[String])(implicit session: DBSession = AutoSession): Seq[MT] =
+  def getMany(primaryIds: Seq[String])(implicit session: DBSession = defaultSession): Seq[MT] =
   {
     val table = modelCompanion.syntax("tt")
 
     val query = queryGetMany(primaryIds)
       .map(modelCompanion.fromSqlResult(_, table.resultName))
-      .collection
+      .list()
       .apply()
 
     query
@@ -203,10 +199,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
-  def save(model: MT, primaryId: Option[String])(implicit session: DBSession = AutoSession): String =
+  def save(model: MT, primaryId: Option[String])(implicit session: DBSession): String =
   {
     primaryId match {
       case Some(pId: String) => {
@@ -221,10 +216,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
-  def saveMany(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
+  def saveMany(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = defaultSession): Seq[String] =
   {
     primaryId match {
       case Nil => performModelBatchInsert(model)
@@ -237,10 +231,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
-  def performModelUpdate(model: MT, primaryId: String)(implicit session: DBSession = AutoSession): Int =
+  def performModelUpdate(model: MT, primaryId: String)(implicit session: DBSession = defaultSession): Int =
   {
     val updateValues: Map[SQLSyntax, ParameterBinder] = model.updateValuesMap
 
@@ -252,7 +245,6 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param primaryId
     * @param updateValues
     * @param session
-    *
     * @return
     */
   def performUpdate(
@@ -283,10 +275,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
-  def performModelBatchUpdate(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = AutoSession): Seq[String] =
+  def performModelBatchUpdate(model: Seq[MT], primaryId: Seq[String])(implicit session: DBSession = defaultSession): Seq[String] =
   {
     throw new NotImplementedError("batch update not implemented")
   }
@@ -295,10 +286,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     *
     * @param model
     * @param session
-    *
     * @return
     */
-  def performModelInsert(model: MT)(implicit session: DBSession = AutoSession): String =
+  def performModelInsert(model: MT)(implicit session: DBSession = defaultSession): String =
   {
     performInsertAndReturnId(model.insertValuesMap)
   }
@@ -308,12 +298,11 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     *
     * @param insertValues
     * @param session
-    *
     * @return
     */
   def performInsertAndReturnId(
     insertValues: Map[SQLSyntax, ParameterBinder]
-  )(implicit session: DBSession): String =
+  )(implicit session: DBSession = defaultSession): String =
   {
     //Required to use SQLToResult class to insert value
     import scalikejdbc.nischalmod.SqlHelpers._
@@ -347,10 +336,9 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     *
     * @param models
     * @param session
-    *
     * @return
     */
-  def performModelBatchInsert(models: Seq[MT])(implicit session: DBSession = AutoSession): Seq[String] =
+  def performModelBatchInsert(models: Seq[MT])(implicit session: DBSession = defaultSession): Seq[String] =
   {
     val insertFields: Seq[(SQLSyntax, ParameterBinder)] = models.head.insertValuesMap.map(_._1 -> sqls.?).toSeq
     val batchInsertValues = models.map(_.insertValuesMap.map(_._2).toSeq)
@@ -379,7 +367,6 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     * Get Query
     *
     * @param primaryId
-    *
     * @return
     */
   def queryGet(primaryId: String) =

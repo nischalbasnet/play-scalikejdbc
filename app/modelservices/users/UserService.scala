@@ -95,7 +95,7 @@ class UserService @Inject()(
     */
   def updateUser(user_id: String, userInfo: UserUpdateForm): User =
   {
-    val success = userDAO.save(user_id, userInfo)
+    val success = userDAO.saveForm(user_id, userInfo)
     //get the update user now
     userDAO.getOrFail(user_id)
   }

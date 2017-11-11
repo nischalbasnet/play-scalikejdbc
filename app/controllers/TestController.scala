@@ -2,35 +2,71 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.mvc.ControllerComponents
+
+//import com.nischal.macros.INormModel
+//import com.nischal.InsertMap
+//import com.nischal.macros.NormModel
 import modelservices.address.models.Address
 import com.nischal.base.{BaseController, BaseModel, RelationDetail}
 import com.nischal.db.{ModelRelation, RelationTypes}
+//import com.nischal.macros.update
+
 import play.api.libs.json.{Json, Reads, Writes}
 import play.api.mvc.Action
-import scalikejdbc._
 import scalikejdbc.interpolation.SQLSyntax
 import modelservices.users.{IUserService, models}
 import modelservices.users.dao.IUserDAO
 import modelservices.users.models.UserRelations.UserRelations
 import modelservices.users.models._
 
+
+//@NormModel
+//case class TUser(
+//  user_id: String,
+//  @update first_name: String,
+//  @update last_name: String,
+//  @update email: String,
+//  @update mobile_number: Option[String]
+//) extends INormModel
+
+object TUser{
+
+}
+
 /**
   * Created by nbasnet on 6/10/17.
   */
 @Singleton
 class TestController @Inject()(
-  userService: IUserService,
+  cc: ControllerComponents,
+  userService: IUserService
+)(
   implicit val userDAO: IUserDAO
-) extends BaseController
+) extends BaseController(cc)
 {
+  import scalikejdbc._
+
   implicit val session = AutoSession
 
   def test() = Action {
     val userId = "usid_1000010"
 
-//    val userDetail = userDAO.getWithOld(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
+    //TEST
+//    val tUser: TUser = TUser(
+//      "usr_112",
+//      "Ashim",
+//      "Adhikari",
+//      "email@email.com",
+//      None
+//    )
+//
+//    println(tUser.insertSQL())
+    //END TEST
 
-//    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+    //    val userDetail = userDAO.getWithOld(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
+
+    //    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
     val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
 
     //    Ok(userDetail.toJson()(User.withFullDetail))
@@ -75,7 +111,6 @@ class TestController @Inject()(
   {
     val user: models.User.SQLSyntaxT[User] = User.defaultTable
     val fullQuery = queryGetWith(user, user_id, relations)
-
 
     val userInfo = fullQuery.map(rs => {
       val usr: User = User.fromSqlResult(rs, user.resultName)
