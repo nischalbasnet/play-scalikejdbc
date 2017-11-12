@@ -1,72 +1,79 @@
 package modelservices.users.models
 
 import org.joda.time.DateTime
-import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.{ParameterBinder, autoNamedValues}
 
 trait UserAddressATC
 {
   self: UserAddress =>
 
-  protected val _updateForm: UserAddressUpdateForm = UserAddressUpdateForm()
+  protected var _updateForm: UserAddressUpdateForm = UserAddressUpdateForm()
 
-  def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
+  def getInsertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = UserAddress.column
-    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
-      table.column("tag_name") -> tag_name,
-      table.column("description") -> description,
-      table.column("is_primary") -> is_primary,
-      table.column("user_id") -> user_id,
-      table.column("address_id") -> address_id,
-      table.column("created") -> created,
-      table.column("update") -> update
+    val insertMap = autoNamedValues[UserAddress](
+      this,
+      UserAddress.column,
+      "user_address_id",
+      "created",
+      "updated",
+      "soft_deleted"
     )
+//    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
+//      table.column("tag_name") -> tag_name,
+//      table.column("description") -> description,
+//      table.column("is_primary") -> is_primary,
+//      table.column("user_id") -> user_id,
+//      table.column("address_id") -> address_id,
+//      table.column("created") -> created,
+//      table.column("update") -> update
+//    )
 
     insertMap
   }
 
-  def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
+  def getUpdateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
 
   def setTagName(inTagName: String) =
   {
-    _updateForm.tag_name = Some(inTagName)
+    _updateForm = _updateForm.copy(tag_name = Some(inTagName))
     this
   }
 
   def setDescription(inDescription: String) =
   {
-    _updateForm.description = Some(inDescription)
+    _updateForm = _updateForm.copy(description = Some(inDescription))
     this
   }
 
   def setIsPrimary(inIsPrimary: String) =
   {
-    _updateForm.is_primary = Some(inIsPrimary)
+    _updateForm = _updateForm.copy(is_primary = Some(inIsPrimary))
     this
   }
 
   def setUserId(inUserId: String) =
   {
-    _updateForm.user_id = Some(inUserId)
+    _updateForm = _updateForm.copy(user_id = Some(inUserId))
     this
   }
 
   def setAddressId(inAddressId: String) =
   {
-    _updateForm.address_id = Some(inAddressId)
+    _updateForm = _updateForm.copy(address_id = Some(inAddressId))
     this
   }
 
-  def setUpdate(inUpdate: DateTime) =
+  def setUpdated(inUpdated: DateTime) =
   {
-    _updateForm.update = Some(inUpdate)
+    _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
   def setSoftDeleted(inSoftDeleted: DateTime) =
   {
-    _updateForm.soft_deleted = Some(inSoftDeleted)
+    _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
   }
 
@@ -87,7 +94,7 @@ trait UserAddressATC
       },
       user_id = _updateForm.user_id.getOrElse(user_id),
       address_id = _updateForm.address_id.getOrElse(address_id),
-      update = _updateForm.update.getOrElse(update),
+      updated = _updateForm.updated.getOrElse(updated),
       soft_deleted = _updateForm.soft_deleted match {
         case Some(s: DateTime) => Some(s)
         case _ => soft_deleted
@@ -101,13 +108,13 @@ trait UserAddressATC
   * UserAddresses companion Object
   */
 case class UserAddressUpdateForm(
-  var tag_name: Option[String] = None,
-  var description: Option[String] = None,
-  var is_primary: Option[String] = None,
-  var user_id: Option[String] = None,
-  var address_id: Option[String] = None,
-  var update: Option[DateTime] = None,
-  var soft_deleted: Option[DateTime] = None
+  tag_name: Option[String] = None,
+  description: Option[String] = None,
+  is_primary: Option[String] = None,
+  user_id: Option[String] = None,
+  address_id: Option[String] = None,
+  updated: Option[DateTime] = None,
+  soft_deleted: Option[DateTime] = None
 )
 {
   def updateValuesMap: Map[SQLSyntax, ParameterBinder] =
@@ -125,7 +132,7 @@ case class UserAddressUpdateForm(
 
     if (address_id.isDefined) updateMap = updateMap ++ Map(table.column("address_id") -> address_id.get)
 
-    if (update.isDefined) updateMap = updateMap ++ Map(table.column("update") -> update.get)
+    if (updated.isDefined) updateMap = updateMap ++ Map(table.column("update") -> updated.get)
 
     if (soft_deleted.isDefined) updateMap = updateMap ++ Map(table.column("soft_deleted") -> soft_deleted.get)
 

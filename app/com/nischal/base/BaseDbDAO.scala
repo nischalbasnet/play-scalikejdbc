@@ -235,7 +235,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def performModelUpdate(model: MT, primaryId: String)(implicit session: DBSession = defaultSession): Int =
   {
-    val updateValues: Map[SQLSyntax, ParameterBinder] = model.updateValuesMap
+    val updateValues: Map[SQLSyntax, ParameterBinder] = model.getUpdateValuesMap
 
     performUpdate(primaryId, updateValues)
   }
@@ -290,7 +290,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def performModelInsert(model: MT)(implicit session: DBSession = defaultSession): String =
   {
-    performInsertAndReturnId(model.insertValuesMap)
+    performInsertAndReturnId(model.getInsertValuesMap)
   }
 
   /**
@@ -340,8 +340,8 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def performModelBatchInsert(models: Seq[MT])(implicit session: DBSession = defaultSession): Seq[String] =
   {
-    val insertFields: Seq[(SQLSyntax, ParameterBinder)] = models.head.insertValuesMap.map(_._1 -> sqls.?).toSeq
-    val batchInsertValues = models.map(_.insertValuesMap.map(_._2).toSeq)
+    val insertFields: Seq[(SQLSyntax, ParameterBinder)] = models.head.getInsertValuesMap.map(_._1 -> sqls.?).toSeq
+    val batchInsertValues = models.map(_.getInsertValuesMap.map(_._2).toSeq)
 
     withSQL {
       insert.into(modelCompanion).namedValues(insertFields: _*)

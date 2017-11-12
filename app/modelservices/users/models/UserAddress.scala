@@ -15,7 +15,7 @@ case class UserAddress(
   user_id: String,
   address_id: String,
   created: DateTime,
-  update: DateTime,
+  updated: DateTime,
   soft_deleted: Option[DateTime]
 ) extends BaseModel[UserAddress] with UserAddressATC with UserAddressRelations
 {

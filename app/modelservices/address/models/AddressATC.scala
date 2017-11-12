@@ -1,79 +1,86 @@
 package modelservices.address.models
 
 import org.joda.time.DateTime
-import scalikejdbc.ParameterBinder
+import scalikejdbc.{ParameterBinder, autoNamedValues}
 import scalikejdbc.interpolation.SQLSyntax
 
 trait AddressATC
 {
   self: Address =>
 
-  protected val _updateForm: AddressUpdateForm = AddressUpdateForm()
+  protected var _updateForm: AddressUpdateForm = AddressUpdateForm()
 
-  def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
+  def getInsertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
-    val table = Address.column
-    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
-      table.column("address_1") -> address_1,
-      table.column("address_2") -> address_2,
-      table.column("city") -> city,
-      table.column("state_provience") -> state_provience,
-      table.column("postal_code") -> postal_code,
-      table.column("created") -> created,
-      table.column("updated") -> updated,
-      table.column("country") -> country
+    val insertMap = autoNamedValues[Address](
+      this,
+      Address.column,
+      "address_id",
+      "created",
+      "updated",
+      "soft_deleted"
     )
+    //    val insertMap: Map[SQLSyntax, ParameterBinder] = Map(
+    //      table.column("address_1") -> address_1,
+    //      table.column("address_2") -> address_2,
+    //      table.column("city") -> city,
+    //      table.column("state_provience") -> state_provience,
+    //      table.column("postal_code") -> postal_code,
+    //      table.column("created") -> created,
+    //      table.column("updated") -> updated,
+    //      table.column("country") -> country
+    //    )
 
     insertMap
   }
 
-  def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
+  def getUpdateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap
 
   def setAddress1(inAddress1: String) =
   {
-    _updateForm.address_1 = Some(inAddress1)
+    _updateForm = _updateForm.copy(address_1 = Some(inAddress1))
     this
   }
 
   def setAddress2(inAddress2: String) =
   {
-    _updateForm.address_2 = Some(inAddress2)
+    _updateForm = _updateForm.copy(address_2 = Some(inAddress2))
     this
   }
 
   def setCity(inCity: String) =
   {
-    _updateForm.city = Some(inCity)
+    _updateForm = _updateForm.copy(city = Some(inCity))
     this
   }
 
   def setStateProvience(inStateProvience: String) =
   {
-    _updateForm.state_provience = Some(inStateProvience)
+    _updateForm = _updateForm.copy(state_provience = Some(inStateProvience))
     this
   }
 
   def setPostalCode(inPostalCode: Int) =
   {
-    _updateForm.postal_code = Some(inPostalCode)
+    _updateForm = _updateForm.copy(postal_code = Some(inPostalCode))
     this
   }
 
   def setUpdated(inUpdated: DateTime) =
   {
-    _updateForm.updated = Some(inUpdated)
+    _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
   def setSoftDeleted(inSoftDeleted: DateTime) =
   {
-    _updateForm.soft_deleted = Some(inSoftDeleted)
+    _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
   }
 
   def setCountry(inCountry: String) =
   {
-    _updateForm.country = Some(inCountry)
+    _updateForm = _updateForm.copy(country = Some(inCountry))
     this
   }
 
@@ -112,14 +119,14 @@ trait AddressATC
   * Addresses companion Object
   */
 case class AddressUpdateForm(
-  var address_1: Option[String] = None,
-  var address_2: Option[String] = None,
-  var city: Option[String] = None,
-  var state_provience: Option[String] = None,
-  var postal_code: Option[Int] = None,
-  var updated: Option[DateTime] = None,
-  var soft_deleted: Option[DateTime] = None,
-  var country: Option[String] = None
+  address_1: Option[String] = None,
+  address_2: Option[String] = None,
+  city: Option[String] = None,
+  state_provience: Option[String] = None,
+  postal_code: Option[Int] = None,
+  updated: Option[DateTime] = None,
+  soft_deleted: Option[DateTime] = None,
+  country: Option[String] = None
 )
 {
   def updateValuesMap: Map[SQLSyntax, ParameterBinder] =

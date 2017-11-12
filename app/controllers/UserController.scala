@@ -12,6 +12,7 @@ import play.api.mvc._
 import modelservices.users.IUserService
 import modelservices.users.dao.IUserDAO
 import modelservices.users.models.{User, UserAddress, UserUpdateForm}
+import play.api.Configuration
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -19,7 +20,8 @@ import modelservices.users.models.{User, UserAddress, UserUpdateForm}
 @Singleton
 class UserController @Inject()(
   userService: IUserService,
-  cc: ControllerComponents
+  cc: ControllerComponents,
+  config: Configuration
 )(
   implicit val userDAO: IUserDAO
 ) extends BaseController(cc)

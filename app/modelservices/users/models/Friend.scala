@@ -10,7 +10,7 @@ case class Friend(
   user_id: String,
   friend_user_id: String,
   created: DateTime,
-  update: DateTime,
+  updated: DateTime,
   soft_deleted: Option[DateTime]
 ) extends BaseModel[Friend] with FriendATC
 

@@ -2,7 +2,7 @@ package modelservices.users.models
 
 import org.joda.time.DateTime
 import scalikejdbc.interpolation.SQLSyntax
-import scalikejdbc.{ParameterBinder, autoNamedValues}
+import scalikejdbc.{ParameterBinder, ParameterBinderFactory, autoNamedValues}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -14,7 +14,7 @@ trait UserATC
 {
   self: User =>
 
-  protected val _updateForm: UserUpdateForm = UserUpdateForm()
+  protected var _updateForm: UserUpdateForm = UserUpdateForm()
 
   val insertExcludeList = Seq(
     "user_id",
@@ -23,7 +23,7 @@ trait UserATC
     "soft_deleted"
   )
 
-  def insertValuesMap: Map[SQLSyntax, ParameterBinder] =
+  def getInsertValuesMap: Map[SQLSyntax, ParameterBinder] =
   {
     val table = User.column
 
@@ -51,69 +51,69 @@ trait UserATC
     insertMap
   }
 
-  def updateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap()
+  def getUpdateValuesMap: Map[SQLSyntax, ParameterBinder] = _updateForm.updateValuesMap()
 
-  def setFirstName(inFirstName: String) =
+  def setFirstName(inFirstName: String): User =
   {
-    _updateForm.first_name = Some(inFirstName)
+    _updateForm = _updateForm.copy(first_name = Some(inFirstName))
     this
   }
 
-  def setLastName(inLastName: String) =
+  def setLastName(inLastName: String): User =
   {
-    _updateForm.last_name = Some(inLastName)
+    _updateForm = _updateForm.copy(last_name = Some(inLastName))
     this
   }
 
-  def setEmail(inEmail: String) =
+  def setEmail(inEmail: String): User =
   {
-    _updateForm.email = Some(inEmail)
+    _updateForm = _updateForm.copy(email = Some(inEmail))
     this
   }
 
-  def setMobileNumber(inMobileNumber: String) =
+  def setMobileNumber(inMobileNumber: String): User =
   {
-    _updateForm.mobile_number = Some(inMobileNumber)
+    _updateForm = _updateForm.copy(mobile_number = Some(inMobileNumber))
     this
   }
 
-  def setImage(inImage: String) =
+  def setImage(inImage: String): User =
   {
-    _updateForm.image = Some(inImage)
+    _updateForm = _updateForm.copy(image = Some(inImage))
     this
   }
 
-  def setPassword(inPassword: String) =
+  def setPassword(inPassword: String): User =
   {
-    _updateForm.password = Some(inPassword)
+    _updateForm = _updateForm.copy(password = Some(inPassword))
     this
   }
 
-  def setSalt(inSalt: String) =
+  def setSalt(inSalt: String): User =
   {
-    _updateForm.salt = Some(inSalt)
+    _updateForm = _updateForm.copy(salt = Some(inSalt))
     this
   }
 
-  def setGenderId(inGenderId: String) =
+  def setGenderId(inGenderId: String): User =
   {
-    _updateForm.gender_id = Some(inGenderId)
+    _updateForm = _updateForm.copy(gender_id = Some(inGenderId))
     this
   }
 
-  def setUpdated(inUpdated: DateTime) =
+  def setUpdated(inUpdated: DateTime): User =
   {
-    _updateForm.updated = Some(inUpdated)
+    _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
-  def setSoftDeleted(inSoftDeleted: DateTime) =
+  def setSoftDeleted(inSoftDeleted: DateTime): User =
   {
-    _updateForm.soft_deleted = Some(inSoftDeleted)
+    _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
   }
 
-  def syncOriginal() =
+  def syncOriginal(): User =
   {
     this.copy(
       first_name = _updateForm.first_name.getOrElse(first_name),
@@ -150,49 +150,88 @@ trait UserATC
   * Users companion Object
   */
 case class UserUpdateForm(
-  var first_name: Option[String] = None,
-  var last_name: Option[String] = None,
-  var email: Option[String] = None,
-  var mobile_number: Option[String] = None,
-  var image: Option[String] = None,
-  var password: Option[String] = None,
-  var salt: Option[String] = None,
-  var gender_id: Option[String] = None,
-  var updated: Option[DateTime] = None,
-  var soft_deleted: Option[DateTime] = None
+  first_name: Option[String] = None,
+  last_name: Option[String] = None,
+  email: Option[String] = None,
+  mobile_number: Option[String] = None,
+  image: Option[String] = None,
+  password: Option[String] = None,
+  salt: Option[String] = None,
+  gender_id: Option[String] = None,
+  updated: Option[DateTime] = None,
+  soft_deleted: Option[DateTime] = None
 )
 {
   private val _nullValues: ListBuffer[String] = ListBuffer()
 
-  def setNullValue(value: String) = _nullValues.append(value)
+  def setNullValue(value: String): UserUpdateForm =
+  {
+    _nullValues.append(value)
+    this
+  }
 
-  def setNullValue(values: Seq[String]) = _nullValues.appendAll(values)
+  def setNullValue(values: Seq[String]): UserUpdateForm =
+  {
+    _nullValues.appendAll(values)
+    this
+  }
 
   def updateValuesMap(setNull: Seq[String] = _nullValues): Map[SQLSyntax, ParameterBinder] =
   {
-    val table = User.column
-    var updateMap: Map[SQLSyntax, ParameterBinder] = Map.empty
+    //    val column = User.column
+    val updater = new ModelUpdater[User](User.column)
+      .addIfPresent("first_name", first_name)
+      .addIfPresent("last_name", last_name)
+      .addIfPresent("email", email)
+      .addIfPresent("mobile_number", mobile_number)
+      .addIfPresent("image", image)
+      .addIfPresent("password", password)
+      .addIfPresent("salt", salt)
+      .addIfPresent("gender_id", gender_id)
+      .addIfPresent("updated", updated)
+      .addIfPresent("soft_deleted", soft_deleted)
 
-    if (first_name.isDefined) updateMap = updateMap ++ Map(table.column("first_name") -> first_name.get)
+    //    var updateMap: Map[SQLSyntax, ParameterBinder] = Map.empty
+    //
+    //    updateMap = addIfPresent("first_name", first_name, updateMap, column)
+    //    if (first_name.isDefined) updateMap = updateMap ++ Map(column.column("first_name") -> first_name.get)
+    //
+    //    if (last_name.isDefined) updateMap = updateMap ++ Map(column.column("last_name") -> last_name.get)
+    //
+    //    if (email.isDefined) updateMap = updateMap ++ Map(column.column("email") -> email.get)
+    //
+    //    if (mobile_number.isDefined) updateMap = updateMap ++ Map(column.column("mobile_number") -> mobile_number.get)
+    //
+    //    if (image.isDefined) updateMap = updateMap ++ Map(column.column("image") -> image.get)
+    //
+    //    if (password.isDefined) updateMap = updateMap ++ Map(column.column("password") -> password.get)
+    //
+    //    if (salt.isDefined) updateMap = updateMap ++ Map(column.column("salt") -> salt.get)
+    //
+    //    if (gender_id.isDefined) updateMap = updateMap ++ Map(column.column("gender_id") -> gender_id.get)
+    //
+    //    if (updated.isDefined) updateMap = updateMap ++ Map(column.column("updated") -> updated.get)
+    //
+    //    if (soft_deleted.isDefined) updateMap = updateMap ++ Map(column.column("soft_deleted") -> soft_deleted.get)
 
-    if (last_name.isDefined) updateMap = updateMap ++ Map(table.column("last_name") -> last_name.get)
-
-    if (email.isDefined) updateMap = updateMap ++ Map(table.column("email") -> email.get)
-
-    if (mobile_number.isDefined) updateMap = updateMap ++ Map(table.column("mobile_number") -> mobile_number.get)
-
-    if (image.isDefined) updateMap = updateMap ++ Map(table.column("image") -> image.get)
-
-    if (password.isDefined) updateMap = updateMap ++ Map(table.column("password") -> password.get)
-
-    if (salt.isDefined) updateMap = updateMap ++ Map(table.column("salt") -> salt.get)
-
-    if (gender_id.isDefined) updateMap = updateMap ++ Map(table.column("gender_id") -> gender_id.get)
-
-    if (updated.isDefined) updateMap = updateMap ++ Map(table.column("updated") -> updated.get)
-
-    if (soft_deleted.isDefined) updateMap = updateMap ++ Map(table.column("soft_deleted") -> soft_deleted.get)
-
-    updateMap
+    //    updateMap
+    updater.updateMap
   }
+}
+
+class ModelUpdater[M](
+  column: scalikejdbc.ColumnName[M],
+  private var _updateMap: Map[SQLSyntax, ParameterBinder] = Map.empty
+)
+{
+  def addIfPresent[T](
+    fieldName: String,
+    value: Option[T]
+  )(implicit binding: ParameterBinderFactory[T]): ModelUpdater[M] =
+  {
+    if (value.isDefined) _updateMap = _updateMap ++ Map(column.column(fieldName) -> value.get)
+    this
+  }
+
+  def updateMap: Map[SQLSyntax, ParameterBinder] = _updateMap
 }
