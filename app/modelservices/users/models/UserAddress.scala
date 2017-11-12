@@ -1,9 +1,10 @@
 package modelservices.users.models
 
+import java.time.LocalDateTime
+
+import com.nischal.base.{BaseModel, BaseModelCompanion}
 import modelservices.address.dao.IAddressDAO
 import modelservices.address.models.Address
-import com.nischal.base.{BaseModel, BaseModelCompanion}
-import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
 
@@ -14,9 +15,9 @@ case class UserAddress(
   is_primary: Option[String],
   user_id: String,
   address_id: String,
-  created: DateTime,
-  updated: DateTime,
-  soft_deleted: Option[DateTime]
+  created: LocalDateTime,
+  updated: LocalDateTime,
+  soft_deleted: Option[LocalDateTime]
 ) extends BaseModel[UserAddress] with UserAddressATC with UserAddressRelations
 {
   protected var _addressSetOnly: Address = _
@@ -28,7 +29,7 @@ case class UserAddress(
 object UserAddress extends UserAddressCompanionInfo
 {
 
-  import com.nischal.JsonReaderWriter._
+  val seqTypeCase = shapeless.TypeCase[Seq[UserAddress]]
 
   implicit val reads: Reads[UserAddress] = Json.format[UserAddress]
   implicit val writes: Writes[UserAddress] = Json.format[UserAddress]
@@ -53,7 +54,7 @@ object UserAddress extends UserAddressCompanionInfo
 
 trait UserAddressCompanionInfo extends BaseModelCompanion[UserAddress]
 {
-  override val defaultTable: SQLSyntaxT[UserAddress] = syntax("ua")
+  override val defaultTable: SQLSyntaxT = syntax("ua")
 
   override val tableName = "user_addresses"
 

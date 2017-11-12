@@ -1,17 +1,18 @@
 package modelservices.users.models
 
+import java.time.LocalDateTime
+
 import com.nischal.base.{BaseModelCompanion, BaseModelRelationShips}
 import modelservices.RelationDescriptions
-import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.{WrappedResultSet, autoConstruct}
 
 case class Gender(
   gender_id: String,
   gender_name: String,
-  created: DateTime,
-  updated: DateTime,
-  soft_deleted: Option[DateTime],
+  created: LocalDateTime,
+  updated: LocalDateTime,
+  soft_deleted: Option[LocalDateTime],
   ord: Int
 )
 
@@ -21,9 +22,7 @@ case class Gender(
 object Gender extends GenderCompanionInfo
 {
 
-  import com.nischal.JsonReaderWriter._
-
-  val genderSeq = shapeless.TypeCase[Seq[Gender]]
+  val seqTypeCase = shapeless.TypeCase[Seq[Gender]]
 
   implicit val reads: Reads[Gender] = Json.format[Gender]
   implicit val writes: Writes[Gender] = Json.format[Gender]
@@ -42,7 +41,7 @@ object Gender extends GenderCompanionInfo
 trait GenderCompanionInfo extends BaseModelCompanion[Gender]
 {
 
-  override val defaultTable: SQLSyntaxT[Gender] = this.syntax("g")
+  override val defaultTable: SQLSyntaxT = this.syntax("g")
 
   override val primaryKey: String = "gender_id"
 

@@ -1,7 +1,8 @@
 package modelservices.address.models
 
+import java.time.LocalDateTime
+
 import com.nischal.base.{BaseModel, BaseModelCompanion}
-import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import scalikejdbc.{WrappedResultSet, autoConstruct}
 
@@ -12,9 +13,9 @@ case class Address(
   city: Option[String],
   state_provience: Option[String],
   postal_code: Option[Int],
-  created: DateTime,
-  updated: DateTime,
-  soft_deleted: Option[DateTime],
+  created: LocalDateTime,
+  updated: LocalDateTime,
+  soft_deleted: Option[LocalDateTime],
   country: String
 ) extends BaseModel[Address] with AddressATC
 
@@ -23,8 +24,7 @@ case class Address(
   */
 object Address extends AddressCompanionInfo
 {
-
-  import com.nischal.JsonReaderWriter._
+  val seqTypeCase = shapeless.TypeCase[Seq[Address]]
 
   implicit val reads: Reads[Address] = Json.format[Address]
   implicit val writes: Writes[Address] = Json.format[Address]
@@ -35,7 +35,7 @@ object Address extends AddressCompanionInfo
   */
 trait AddressCompanionInfo extends BaseModelCompanion[Address]
 {
-  override val defaultTable: SQLSyntaxT[Address] = syntax("a")
+  override val defaultTable: SQLSyntaxT = syntax("a")
 
   override val tableName = "addresses"
 

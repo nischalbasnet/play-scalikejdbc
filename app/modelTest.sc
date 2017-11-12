@@ -1,4 +1,5 @@
-import org.joda.time.DateTime
+import java.time.LocalDateTime
+
 import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
 import shapeless.{HNil, LabelledGeneric}
@@ -16,8 +17,8 @@ val user = User(
   password = "pw",
   salt = "salt",
   gender_id = "id_male",
-  created = new DateTime(),
-  updated = new DateTime(),
+  created = LocalDateTime.now(),
+  updated = LocalDateTime.now(),
   soft_deleted = None
 )
 

@@ -1,10 +1,10 @@
 package modelservices.users.models
 
-import org.joda.time.DateTime
+import java.time.LocalDateTime
+
 import scalikejdbc.interpolation.SQLSyntax
 import scalikejdbc.{ParameterBinder, ParameterBinderFactory, autoNamedValues}
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -101,13 +101,13 @@ trait UserATC
     this
   }
 
-  def setUpdated(inUpdated: DateTime): User =
+  def setUpdated(inUpdated: LocalDateTime): User =
   {
     _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
-  def setSoftDeleted(inSoftDeleted: DateTime): User =
+  def setSoftDeleted(inSoftDeleted: LocalDateTime): User =
   {
     _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
@@ -138,7 +138,7 @@ trait UserATC
       },
       updated = _updateForm.updated.getOrElse(updated),
       soft_deleted = _updateForm.soft_deleted match {
-        case Some(s: DateTime) => Some(s)
+        case Some(s: LocalDateTime) => Some(s)
         case _ => soft_deleted
       }
     )
@@ -158,8 +158,8 @@ case class UserUpdateForm(
   password: Option[String] = None,
   salt: Option[String] = None,
   gender_id: Option[String] = None,
-  updated: Option[DateTime] = None,
-  soft_deleted: Option[DateTime] = None
+  updated: Option[LocalDateTime] = None,
+  soft_deleted: Option[LocalDateTime] = None
 )
 {
   private val _nullValues: ListBuffer[String] = ListBuffer()

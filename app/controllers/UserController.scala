@@ -1,10 +1,10 @@
 package controllers
 
+import java.time.LocalDateTime
 import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.BaseController
 import com.nischal.base.NormalizedResponse.{jsonFail, jsonOk}
-import org.joda.time.DateTime
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.Json
@@ -51,9 +51,9 @@ class UserController @Inject()(
       "password" -> optional(text),
       "salt" -> optional(text),
       "gender_id" -> optional(text),
-      "created" -> ignored(DateTime.now()),
-      "updated" -> ignored(DateTime.now()),
-      "soft_deleted" -> ignored(Option(DateTime.now()))
+      "created" -> ignored(LocalDateTime.now()),
+      "updated" -> ignored(LocalDateTime.now()),
+      "soft_deleted" -> ignored(Option(LocalDateTime.now()))
     )(User.apply)(User.unapply)
   )
 
@@ -82,8 +82,8 @@ class UserController @Inject()(
       "password" -> optional(text),
       "salt" -> optional(text),
       "gender_id" -> optional(text),
-      "updated" -> ignored(Option(DateTime.now())),
-      "soft_deleted" -> ignored(Option(DateTime.now()))
+      "updated" -> ignored(Option(LocalDateTime.now())),
+      "soft_deleted" -> ignored(Option(LocalDateTime.now()))
     )(UserUpdateForm.apply)(UserUpdateForm.unapply)
   )
 

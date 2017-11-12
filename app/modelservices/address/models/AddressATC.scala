@@ -1,8 +1,9 @@
 package modelservices.address.models
 
-import org.joda.time.DateTime
-import scalikejdbc.{ParameterBinder, autoNamedValues}
+import java.time.LocalDateTime
+
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.{ParameterBinder, autoNamedValues}
 
 trait AddressATC
 {
@@ -66,13 +67,13 @@ trait AddressATC
     this
   }
 
-  def setUpdated(inUpdated: DateTime) =
+  def setUpdated(inUpdated: LocalDateTime) =
   {
     _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
-  def setSoftDeleted(inSoftDeleted: DateTime) =
+  def setSoftDeleted(inSoftDeleted: LocalDateTime) =
   {
     _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
@@ -106,7 +107,7 @@ trait AddressATC
       },
       updated = _updateForm.updated.getOrElse(updated),
       soft_deleted = _updateForm.soft_deleted match {
-        case Some(s: DateTime) => Some(s)
+        case Some(s: LocalDateTime) => Some(s)
         case _ => soft_deleted
       },
       country = _updateForm.country.getOrElse(country)
@@ -124,8 +125,8 @@ case class AddressUpdateForm(
   city: Option[String] = None,
   state_provience: Option[String] = None,
   postal_code: Option[Int] = None,
-  updated: Option[DateTime] = None,
-  soft_deleted: Option[DateTime] = None,
+  updated: Option[LocalDateTime] = None,
+  soft_deleted: Option[LocalDateTime] = None,
   country: Option[String] = None
 )
 {

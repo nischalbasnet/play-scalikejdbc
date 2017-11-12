@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 
+import modelservices.users.UserEntity
 import play.api.mvc.ControllerComponents
 
 //import com.nischal.macros.INormModel
@@ -30,7 +31,8 @@ import modelservices.users.models._
 //  @update mobile_number: Option[String]
 //) extends INormModel
 
-object TUser{
+object TUser
+{
 
 }
 
@@ -45,6 +47,7 @@ class TestController @Inject()(
   implicit val userDAO: IUserDAO
 ) extends BaseController(cc)
 {
+
   import scalikejdbc._
 
   implicit val session = AutoSession
@@ -53,24 +56,32 @@ class TestController @Inject()(
     val userId = "usid_1000010"
 
     //TEST
-//    val tUser: TUser = TUser(
-//      "usr_112",
-//      "Ashim",
-//      "Adhikari",
-//      "email@email.com",
-//      None
-//    )
-//
-//    println(tUser.insertSQL())
+    //    val tUser: TUser = TUser(
+    //      "usr_112",
+    //      "Ashim",
+    //      "Adhikari",
+    //      "email@email.com",
+    //      None
+    //    )
+    //
+    //    println(tUser.insertSQL())
     //END TEST
 
     //    val userDetail = userDAO.getWithOld(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
 
     //    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
-    val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+//    val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+
+    val user = userDAO.getOrFail(userId)
+    val userEntity = UserEntity(user, userDAO)
+    userEntity.friends.get
 
     //    Ok(userDetail.toJson()(User.withFullDetail))
-    Ok(userDt.get.toJson()(User.withFullDetail))
+//    Ok(userDt.get.toJson()(User.withFullDetail))
+    Ok(Json.toJson(Json.obj(
+      "userInfo" -> userEntity.toJson,
+      "friends" -> Json.toJson(userEntity.friends.get)
+    )))
     //        Ok(userD.statement)
   }
 
@@ -109,7 +120,7 @@ class TestController @Inject()(
 
   def getWith(user_id: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession) =
   {
-    val user: models.User.SQLSyntaxT[User] = User.defaultTable
+    val user: models.User.SQLSyntaxT = User.defaultTable
     val fullQuery = queryGetWith(user, user_id, relations)
 
     val userInfo = fullQuery.map(rs => {
@@ -133,7 +144,7 @@ class TestController @Inject()(
   }
 
   def queryGetWith(
-    user: models.User.SQLSyntaxT[User],
+    user: models.User.SQLSyntaxT,
     user_id: String,
     relations: Seq[RelationDetail[_, _, _]]
   )(implicit session: DBSession): SQL[Nothing, NoExtractor] =

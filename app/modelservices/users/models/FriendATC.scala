@@ -1,8 +1,9 @@
 package modelservices.users.models
 
-import org.joda.time.DateTime
-import scalikejdbc.{ParameterBinder, autoNamedValues}
+import java.time.LocalDateTime
+
 import scalikejdbc.interpolation.SQLSyntax
+import scalikejdbc.{ParameterBinder, autoNamedValues}
 
 trait FriendATC
 {
@@ -44,13 +45,13 @@ trait FriendATC
     this
   }
 
-  def setUpdated(inUpdated: DateTime) =
+  def setUpdated(inUpdated: LocalDateTime) =
   {
     _updateForm = _updateForm.copy(updated = Some(inUpdated))
     this
   }
 
-  def setSoftDeleted(inSoftDeleted: DateTime) =
+  def setSoftDeleted(inSoftDeleted: LocalDateTime) =
   {
     _updateForm = _updateForm.copy(soft_deleted = Some(inSoftDeleted))
     this
@@ -63,7 +64,7 @@ trait FriendATC
       friend_user_id = _updateForm.friend_user_id.getOrElse(friend_user_id),
       updated = _updateForm.updated.getOrElse(updated),
       soft_deleted = _updateForm.soft_deleted match {
-        case Some(s: DateTime) => Some(s)
+        case Some(s: LocalDateTime) => Some(s)
         case _ => soft_deleted
       }
     )
@@ -77,8 +78,8 @@ trait FriendATC
 case class FriendUpdateForm(
   user_id: Option[String] = None,
   friend_user_id: Option[String] = None,
-  updated: Option[DateTime] = None,
-  soft_deleted: Option[DateTime] = None
+  updated: Option[LocalDateTime] = None,
+  soft_deleted: Option[LocalDateTime] = None
 )
 {
   def updateValuesMap: Map[SQLSyntax, ParameterBinder] =

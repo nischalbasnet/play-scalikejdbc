@@ -113,8 +113,8 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
     */
   private def queryUserGender[A](
     user_id: String,
-    g: Gender.SQLSyntaxT[Gender] = Gender.defaultTable,
-    u: User.SQLSyntaxT[User] = User.defaultTable,
+    g: Gender.SQLSyntaxT = Gender.defaultTable,
+    u: User.SQLSyntaxT = User.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {
@@ -140,8 +140,8 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
 
   private def queryUserFriends[A](
     user_id: String,
-    u: User.SQLSyntaxT[User] = User.defaultTable,
-    f: Friend.SQLSyntaxT[Friend] = Friend.defaultTable,
+    u: User.SQLSyntaxT = User.defaultTable,
+    f: Friend.SQLSyntaxT = Friend.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {
@@ -178,8 +178,8 @@ class UserDbDAO extends BaseDbDAO[User] with IUserDbDAO
 
   private def queryUserAddresses[A](
     user_id: String,
-    a: Address.SQLSyntaxT[Address] = Address.defaultTable,
-    ua: UserAddress.SQLSyntaxT[UserAddress] = UserAddress.defaultTable,
+    a: Address.SQLSyntaxT = Address.defaultTable,
+    ua: UserAddress.SQLSyntaxT = UserAddress.defaultTable,
     aliasedResultName: Boolean = true
   ): scalikejdbc.SQLBuilder[A] =
   {

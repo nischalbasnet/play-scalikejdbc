@@ -1,13 +1,14 @@
 package modelservices.users.models
 
-import modelservices.address.models.Address
+import java.time.LocalDateTime
+
 import com.nischal.base.{BaseModel, BaseModelCompanion, BaseModelRelationShips, BaseModelRelations}
-import org.joda.time.DateTime
+import modelservices.RelationDescriptions
+import modelservices.address.models.Address
+import modelservices.users.dao.IUserDAO
+import modelservices.users.models
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalikejdbc.{AutoSession, DBSession, WrappedResultSet, autoConstruct}
-import modelservices.users.dao.IUserDAO
-import modelservices.RelationDescriptions
-import modelservices.users.models
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -22,9 +23,9 @@ case class User(
   password: Option[String],
   salt: Option[String],
   gender_id: Option[String],
-  created: DateTime,
-  updated: DateTime,
-  soft_deleted: Option[DateTime]
+  created: LocalDateTime,
+  updated: LocalDateTime,
+  soft_deleted: Option[LocalDateTime]
 ) extends BaseModel[User] with UserATC with UserRelationDefinitions
 {
   protected var _genderSetOnly: Option[Gender] = _
@@ -35,9 +36,7 @@ case class User(
 object User extends UserCompanionInfo
 {
 
-  import com.nischal.JsonReaderWriter._
-
-  val userSeq = shapeless.TypeCase[Seq[User]]
+  val seqTypeCase = shapeless.TypeCase[Seq[User]]
 
   implicit val reads: Reads[User] = Json.format[User]
   implicit val writes: Writes[User] = new Writes[User]
@@ -61,9 +60,12 @@ object User extends UserCompanionInfo
   {
     def writes(u: User): JsValue =
     {
-      val friends = if (u._friendsSetOnly == null) Seq.empty else u._friendsSetOnly
-      val gender = if (u._genderSetOnly == null) None else u._genderSetOnly
-      val addresses = if (u._addressesSetOnly == null) Seq.empty else u._addressesSetOnly
+      val friends = if (u._friendsSetOnly == null) Seq.empty
+      else u._friendsSetOnly
+      val gender = if (u._genderSetOnly == null) None
+      else u._genderSetOnly
+      val addresses = if (u._addressesSetOnly == null) Seq.empty
+      else u._addressesSetOnly
       Json.obj(
         "user_address_id" -> u.user_id,
         "tag_name" -> u.first_name,
@@ -84,8 +86,8 @@ object User extends UserCompanionInfo
   override def setModelRelation[A](model: models.User.Model, relation: Seq[A]): Unit =
   {
     relation match {
-      case Gender.genderSeq(r) => model.setGender(r.headOption)
-      case userSeq(r) => model.setFriends(r)
+      case Gender.seqTypeCase(r) => model.setGender(r.headOption)
+      case seqTypeCase(r) => model.setFriends(r)
       case _ => println(s"SETTER IS NOT DEFINED FOR => $relation")
     }
   }
@@ -96,7 +98,7 @@ object User extends UserCompanionInfo
   */
 trait UserCompanionInfo extends BaseModelCompanion[User]
 {
-  override val defaultTable: SQLSyntaxT[User] = syntax("u")
+  override val defaultTable: SQLSyntaxT = syntax("u")
 
   override val tableName = "users"
 
@@ -122,7 +124,6 @@ trait UserRelationDefinitions
     *
     * @param userDAO
     * @param session
-    *
     * @return
     */
   def gender()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Option[Gender] =
@@ -141,7 +142,6 @@ trait UserRelationDefinitions
     *
     * @param userDAO
     * @param session
-    *
     * @return
     */
   def friends()(implicit userDAO: IUserDAO, session: DBSession = AutoSession): Seq[User] =
