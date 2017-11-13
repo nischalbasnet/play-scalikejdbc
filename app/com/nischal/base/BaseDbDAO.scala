@@ -19,17 +19,15 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
 
   def modelObserver: Option[IObserveModelEvent[MT]] = None
 
-  /**
+  /** s
     *
     * @param primaryId
     * @return
     */
   def get(primaryId: String)(implicit session: DBSession = defaultSession): Option[MT] =
   {
-    val table = modelCompanion.syntax("tt")
-
     val query = queryGet(primaryId)
-      .map(modelCompanion.fromSqlResult(_, table.resultName))
+      .map(modelCompanion.fromSqlResult)
       .single()
       .apply()
 
@@ -46,12 +44,10 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def getWith(primaryId: String, relations: Seq[RelationDetail[_, _, _]])(implicit session: DBSession = defaultSession): Option[MT] =
   {
-    val table = modelCompanion.syntax("tt")
-
     val fullQuery = queryGetWithRelations(primaryId, relations)
 
     val modelInfo = fullQuery.map(rs => {
-      val mdl: MT = modelCompanion.fromSqlResult(rs, table.resultName)
+      val mdl: MT = modelCompanion.fromSqlResult(rs)
 
       //set relation value from result set
       relations.foreach(r => {
@@ -80,14 +76,14 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     relations: Seq[RelationDetail[_, _, _]]
   )(implicit session: DBSession = defaultSession): SQL[Nothing, NoExtractor] =
   {
-    val table = modelCompanion.syntax("tt")
+    val table = modelCompanion.defaultTable
 
     var selectFields = sqls"SELECT ${table.resultAll}"
     var relationJoins = sqls""
     val modelFilter =
       sqls"""
             WHERE ${table.column(modelCompanion.primaryKey)} = $primaryId
-            ${queryArchiveFilter}
+            $queryArchiveFilter
             GROUP BY ${table.column(modelCompanion.primaryKey)}
           """
 
@@ -183,10 +179,8 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def getMany(primaryIds: Seq[String])(implicit session: DBSession = defaultSession): Seq[MT] =
   {
-    val table = modelCompanion.syntax("tt")
-
     val query = queryGetMany(primaryIds)
-      .map(modelCompanion.fromSqlResult(_, table.resultName))
+      .map(modelCompanion.fromSqlResult)
       .list()
       .apply()
 
@@ -341,7 +335,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
   def performModelBatchInsert(models: Seq[MT])(implicit session: DBSession = defaultSession): Seq[String] =
   {
     val insertFields: Seq[(SQLSyntax, ParameterBinder)] = models.head.getInsertValuesMap.map(_._1 -> sqls.?).toSeq
-    val batchInsertValues = models.map(_.getInsertValuesMap.map(_._2).toSeq)
+    val batchInsertValues = models.map(_.getInsertValuesMap.values.toSeq)
 
     withSQL {
       insert.into(modelCompanion).namedValues(insertFields: _*)
@@ -358,7 +352,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     *
     * @return
     */
-  def queryArchiveFilter = modelCompanion.archivedField match {
+  def queryArchiveFilter: SQLSyntax = modelCompanion.archivedField match {
     case Some(a: String) => sqls" AND ${a} NOTNULL "
     case _ => sqls""
   }
@@ -371,7 +365,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
     */
   def queryGet(primaryId: String) =
   {
-    val table = modelCompanion.syntax("tt")
+    val table = modelCompanion.defaultTable
 
     sql"""
            SELECT ${table.result.*}
@@ -383,7 +377,7 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
 
   def queryGetMany(primaryIds: Seq[String]) =
   {
-    val table = modelCompanion.syntax("tt")
+    val table = modelCompanion.defaultTable
 
     sql"""
            SELECT ${table.result.*}
@@ -392,5 +386,38 @@ abstract class BaseDbDAO[MT <: BaseModel[MT]] extends IBaseDAO[MT, String]
             ${queryArchiveFilter}
          """
   }
+}
 
+trait DbDAOWithEntity[MT <: BaseModel[MT], ET <: BaseEntity[MT]]
+{
+  self: BaseDbDAO[MT] =>
+
+  def entityCompanion: BaseEntityCompanion[ET, MT, self.type]
+
+  /**
+    * Get user entity
+    *
+    * @param primaryId
+    * @param session
+    * @return
+    */
+  def getEntity(primaryId: String)(implicit session: DBSession = defaultSession): Option[ET] =
+  {
+    get(primaryId) match {
+      case Some(m) => Some(entityCompanion(m, this))
+      case _ => None
+    }
+  }
+
+  /**
+    * Get user entity or fail with exception
+    *
+    * @param primaryId
+    * @param session
+    * @return
+    */
+  def getEntityOrFail(primaryId: String)(implicit session: DBSession = defaultSession): ET =
+  {
+    entityCompanion(getOrFail(primaryId), this)
+  }
 }

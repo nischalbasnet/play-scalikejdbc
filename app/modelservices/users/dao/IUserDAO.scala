@@ -2,15 +2,20 @@ package modelservices.users.dao
 
 import com.nischal.base.RelationDetail
 import com.nischal.basecontracts.{IBaseReadDAO, IBaseWriteDAO}
-import scalikejdbc.{AutoSession, DBSession}
-import services.events.ModelEvent
-import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.UserEntity
 import modelservices.users.models.{Gender, User, UserAddress, UserUpdateForm}
+import scalikejdbc.DBSession
+import services.events.ModelEvent
 
 /**
   * Created by nbasnet on 6/4/17.
   */
 trait IUserDAO extends IUserReadDAO with IUserWriteDAO
+{
+  def getEntity(primaryId: String)(implicit session: DBSession): Option[UserEntity]
+
+  def getEntityOrFail(primaryId: String)(implicit session: DBSession): UserEntity
+}
 
 trait IUserReadDAO extends IBaseReadDAO[User, String]
 {
@@ -26,7 +31,6 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
     * @param mobile_number
     * @param gender_id
     * @param session
-    *
     * @return
     */
   def getFor(
@@ -42,7 +46,6 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
     *
     * @param user_id
     * @param session
-    *
     * @return
     */
   def getUsersGender(user_id: String)(implicit session: DBSession): Option[Gender]
@@ -51,7 +54,6 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
     *
     * @param user_id
     * @param session
-    *
     * @return
     */
   def getFriends(user_id: String)(implicit session: DBSession): Seq[User]
@@ -59,7 +61,6 @@ trait IUserReadDAO extends IBaseReadDAO[User, String]
   /**
     *
     * @param user_id
-    *
     * @return
     */
   def getAddresses(user_id: String)(implicit session: DBSession): scala.Seq[UserAddress]
@@ -74,7 +75,6 @@ trait IUserWriteDAO extends IBaseWriteDAO[User, String]
     * @param newPassword
     * @param salt
     * @param session
-    *
     * @return
     */
   def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession): Int

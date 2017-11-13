@@ -2,10 +2,9 @@ package modelservices.users
 
 import javax.inject.{Inject, Singleton}
 
-import scalikejdbc.{AutoSession, DBSession}
 import modelservices.users.dao.IUserDAO
-import modelservices.users.models.{Gender, User, UserAddress, UserUpdateForm}
-import play.api.libs.json.{JsValue, Json, Writes}
+import modelservices.users.models.{User, UserUpdateForm}
+import scalikejdbc.AutoSession
 
 /**
   * Created by nbasnet on 6/7/17.
@@ -107,92 +106,4 @@ trait IUserService
   def createUser(user: User): User
 
   def updateUser(user_id: String, userInfo: UserUpdateForm): User
-}
-
-case class UserEntity(
-  data: User,
-  dao: IUserDAO
-)
-{
-  //use the value of model like property of entity
-  import data._
-
-  implicit val defaultSession: DBSession = dao.defaultSession
-
-  lazy val friends: LazyInit[Seq[User]] = LazyInit[Seq[User]](
-    setFn = () => dao.getFriends(user_id)
-  )
-  lazy val gender: LazyInit[Option[Gender]] = LazyInit[Option[Gender]](
-    setFn = () => dao.getUsersGender(user_id)
-  )
-  lazy val addresses: LazyInit[Seq[UserAddress]] = LazyInit[Seq[UserAddress]](
-    setFn = () => dao.getAddresses(user_id)
-  )
-
-  def setRelation[R](relation: Seq[R]): Unit =
-  {
-    relation match {
-      case Gender.seqTypeCase(r) => gender := r.headOption
-      case User.seqTypeCase(r) => friends := r
-      case UserAddress.seqTypeCase(r) => addresses := r
-      case _ => println(s"UserEntity: SETTER IS NOT DEFINED FOR => $relation")
-    }
-  }
-
-  def toJson(implicit writes: Writes[User]): JsValue = data.toJson()
-}
-
-object UserEntity
-{
-  def apply(
-    data: User,
-    dao: IUserDAO,
-    friends: Seq[User]
-  ): UserEntity =
-  {
-    val user = new UserEntity(data, dao)
-    user.friends := friends
-    user
-  }
-}
-
-trait LazyInit[T]
-{
-  private var pValue: Option[T] = None
-
-  def isInitialized: Boolean = pValue.isDefined
-
-  def get: T =
-  {
-    if (!isInitialized) {
-      pValue = Some(setter())
-    }
-    pValue.get
-  }
-
-  def getOpt: Option[T] =
-  {
-    pValue
-  }
-
-  private def updateValue(value: T): Unit =
-  {
-    if (!isInitialized) pValue = Some(value)
-    else println("trying to initialize already initialized value")
-  }
-
-  def :=(value: T): Unit =
-  {
-    updateValue(value)
-  }
-
-  def setter: () => T
-}
-
-object LazyInit
-{
-  def apply[T](setFn: () => T): LazyInit[T] = new LazyInit[T]
-  {
-    override def setter: () => T = setFn
-  }
 }

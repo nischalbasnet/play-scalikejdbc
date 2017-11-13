@@ -3,10 +3,9 @@ package modelservices.users.dao
 import javax.inject.{Inject, Singleton}
 
 import com.nischal.base.RelationDetail
-import play.api.Logger
-import scalikejdbc.{DBSession, NamedAutoSession}
-import modelservices.users.models.UserRelations.UserRelations
+import modelservices.users.UserEntity
 import modelservices.users.models.{Gender, User, UserAddress, UserUpdateForm}
+import scalikejdbc.{DBSession, NamedAutoSession}
 
 /**
   * Created by nbasnet on 6/4/17.
@@ -25,7 +24,6 @@ class UserDAO @Inject()(
     *
     * @param primaryId
     * @param session
-    *
     * @return
     */
   def get(primaryId: String)(implicit session: DBSession = defaultSession): Option[User] =
@@ -34,11 +32,37 @@ class UserDAO @Inject()(
   }
 
   /**
+    * Get user entity
+    *
+    * @param primaryId
+    * @param session
+    * @return
+    */
+  def getEntity(primaryId: String)(implicit session: DBSession = defaultSession): Option[UserEntity] =
+  {
+    get(primaryId) match {
+      case Some(u: User) => Some(UserEntity(u, this))
+      case _ => None
+    }
+  }
+
+  /**
+    * Get user entity or fail with exception
+    *
+    * @param primaryId
+    * @param session
+    * @return
+    */
+  def getEntityOrFail(primaryId: String)(implicit session: DBSession = defaultSession): UserEntity =
+  {
+    UserEntity(getOrFail(primaryId), this)
+  }
+
+  /**
     * Get Users
     *
     * @param primaryIds
     * @param session
-    *
     * @return
     */
   def getMany(primaryIds: Seq[String])(implicit session: DBSession = defaultSession): Seq[User] =
@@ -51,7 +75,6 @@ class UserDAO @Inject()(
     *
     * @param primaryId
     * @param session
-    *
     * @return
     */
   def getOrFail(primaryId: String)(implicit session: DBSession = defaultSession): User =
@@ -66,7 +89,6 @@ class UserDAO @Inject()(
     * @param newPassword
     * @param salt
     * @param session
-    *
     * @return
     */
   def changeUsersPassword(user: User, newPassword: String, salt: String)(implicit session: DBSession = defaultSession): Int =
@@ -83,7 +105,6 @@ class UserDAO @Inject()(
     * @param mobile_number
     * @param gender_id
     * @param session
-    *
     * @return
     */
   def getFor(
@@ -102,7 +123,6 @@ class UserDAO @Inject()(
     *
     * @param user_id
     * @param session
-    *
     * @return
     */
   def getUsersGender(user_id: String)(implicit session: DBSession = defaultSession): Option[Gender] =
@@ -114,7 +134,6 @@ class UserDAO @Inject()(
     *
     * @param user_id
     * @param session
-    *
     * @return
     */
   override def getFriends(user_id: String)(implicit session: DBSession = defaultSession): Seq[User] =
@@ -125,7 +144,6 @@ class UserDAO @Inject()(
   /**
     *
     * @param user_id
-    *
     * @return
     */
   def getAddresses(user_id: String)(implicit session: DBSession = defaultSession): Seq[UserAddress] =
@@ -140,7 +158,6 @@ class UserDAO @Inject()(
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
   def save(model: User, primaryId: Option[String])(implicit session: DBSession = writeSession): String =
@@ -152,7 +169,6 @@ class UserDAO @Inject()(
     *
     * @param user_id
     * @param updateForm
-    *
     * @return
     */
   def saveForm(user_id: String, updateForm: UserUpdateForm)(implicit session: DBSession = writeSession): Int =
@@ -166,7 +182,6 @@ class UserDAO @Inject()(
     * @param model
     * @param primaryId
     * @param session
-    *
     * @return
     */
   def saveMany(model: Seq[User], primaryId: Seq[String])(implicit session: DBSession = defaultSession): Seq[String] =

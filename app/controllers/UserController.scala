@@ -30,7 +30,6 @@ class UserController @Inject()(
     * Get user
     *
     * @param user_id
-    *
     * @return
     */
   def get(user_id: String) = Action {
@@ -91,7 +90,6 @@ class UserController @Inject()(
     * Update user
     *
     * @param user_id
-    *
     * @return
     */
   def update(user_id: String) = Action(parse.form(
@@ -109,25 +107,24 @@ class UserController @Inject()(
     *
     * @param email
     * @param new_password
-    *
     * @return
     */
   def changePassword(email: String, new_password: String) = Action {
     userService.getByEmail(email) match {
-      case Some(user: User) => {
+      case Some(user: User) =>
         val updatedUser = userService.changeUsersPassword(user, new_password)
 
         Ok(jsonOk(updatedUser.toJson()))
-      }
       case _ => NotFound(jsonFail(message = "User not found"))
     }
   }
 
   def getGender(user_id: String) = Action {
     userService.get(user_id) match {
-      case Some(u: User) => Ok(
-        jsonOk(Json.toJson(u.gender))
-      )
+      case Some(u: User) =>
+        Ok(
+          jsonOk(Json.toJson(u.gender))
+        )
       case _ => NotFound(jsonFail(message = "User not found"))
     }
   }
@@ -136,7 +133,6 @@ class UserController @Inject()(
     * Get user friends
     *
     * @param user_id
-    *
     * @return
     */
   def getFriends(user_id: String) = Action {
@@ -151,7 +147,6 @@ class UserController @Inject()(
   /**
     *
     * @param user_id
-    *
     * @return
     */
   def getAddresses(user_id: String) = Action {

@@ -30,7 +30,6 @@ case class ModelRelation[FT, TT, JT](
     * set overridden query
     *
     * @param overriddenQuery
-    *
     * @return
     */
   def setOverriddenQuery(overriddenQuery: scalikejdbc.SQLBuilder[TT]): ModelRelation[FT, TT, JT] =
@@ -53,7 +52,6 @@ case class ModelRelation[FT, TT, JT](
     * @param junctionSyntax
     * @param aliasedResultName
     * @param returnJunctionTableInfo
-    *
     * @return
     */
   def getQuery(
@@ -97,7 +95,6 @@ case class ModelRelation[FT, TT, JT](
     * @param linkId
     * @param toSyntax
     * @param aliasedResultName
-    *
     * @return
     */
   private def defaultNoJunctionQuerySimple(
@@ -121,7 +118,6 @@ case class ModelRelation[FT, TT, JT](
     * @param fromSyntax
     * @param toSyntax
     * @param aliasedResultName
-    *
     * @return
     */
   private def defaultNoJunctionQuery(
@@ -133,13 +129,14 @@ case class ModelRelation[FT, TT, JT](
   ): scalikejdbc.SQLBuilder[TT] =
   {
     //get proper from table info
-    val properFromSyntax = if (fromSyntax.isDefined) fromSyntax.get
-    else fromTable.defaultTable
+    val properFromSyntax: fromTable.SQLSyntaxT = fromSyntax.map(r => r).getOrElse(fromTable.defaultTable)
 
     //get proper to table info
-    val properToSyntax = if (toSyntax.isDefined) toSyntax.get
-    else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
-    else toTable.defaultTable
+    val properToSyntax: toTable.SQLSyntaxT = (toSyntax, toTableAlias) match {
+      case (Some(ts), _) => ts
+      case (_, Some(ta)) => toTable.syntax(ta)
+      case _ => toTable.defaultTable
+    }
 
     generateNoJunctionQuery(
       toTableKey,
@@ -229,7 +226,6 @@ case class ModelRelation[FT, TT, JT](
     * @param junctionSyntax
     * @param aliasedResultName
     * @param returnJunctionTableInfo
-    *
     * @return
     */
   private def defaultJunctionQuery(
@@ -247,18 +243,31 @@ case class ModelRelation[FT, TT, JT](
     val properJunctionToKey = junctionToTableKey.getOrElse(throw new Exception("Junction table needs to be defined for relation"))
     val properJunctionFromKey = junctionFromTableKey.getOrElse(throw new Exception("Junction table needs to be defined for relation"))
 
-    val properJunctionSyntax = if (junctionSyntax.isDefined) junctionSyntax.get
-    else if (junctionTableAlias.isDefined) properJunctionTable.syntax(junctionTableAlias.get)
-    else properJunctionTable.defaultTable
+    //    val properJunctionSyntax: properJunctionTable.SQLSyntaxT = if (junctionSyntax.isDefined) junctionSyntax.get
+    //    else if (junctionTableAlias.isDefined) properJunctionTable.syntax(junctionTableAlias.get)
+    //    else properJunctionTable.defaultTable
+
+    val properJunctionSyntax: properJunctionTable.SQLSyntaxT = (junctionSyntax, junctionTableAlias) match {
+      case (Some(js), _) => js
+      case (_, Some(jta)) => properJunctionTable.syntax(jta)
+      case _ => properJunctionTable.defaultTable
+    }
 
     //get proper from table info
-    val properFromSyntax = if (fromSyntax.isDefined) fromSyntax.get
-    else fromTable.defaultTable
+    //    val properFromSyntax: fromTable.SQLSyntaxT = if (fromSyntax.isDefined) fromSyntax.get
+    //    else fromTable.defaultTable
+    val properFromSyntax: fromTable.SQLSyntaxT = fromSyntax.map(r => r).getOrElse(fromTable.defaultTable)
 
     //get proper to table info
-    val properToSyntax = if (toSyntax.isDefined) toSyntax.get
-    else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
-    else toTable.defaultTable
+    //    val properToSyntax: toTable.SQLSyntaxT = if (toSyntax.isDefined) toSyntax.get
+    //    else if (toTableAlias.isDefined) toTable.syntax(toTableAlias.get)
+    //    else toTable.defaultTable
+
+    val properToSyntax: toTable.SQLSyntaxT = (toSyntax, toTableAlias) match {
+      case (Some(ts), _) => ts
+      case (_, Some(ta)) => toTable.syntax(ta)
+      case _ => toTable.defaultTable
+    }
 
     //get proper select fields
     val selectField: scalikejdbc.SelectSQLBuilder[TT] = (aliasedResultName, returnJunctionTableInfo) match {

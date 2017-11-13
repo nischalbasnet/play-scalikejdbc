@@ -1,6 +1,7 @@
 package com.nischal.base
 
 import com.nischal.ToJson
+import play.api.libs.json.{JsValue, Writes}
 import scalikejdbc.ParameterBinder
 import scalikejdbc.interpolation.SQLSyntax
 
@@ -16,4 +17,18 @@ abstract class BaseModel[T] extends ToJson[T]
   def getUpdateValuesMap: Map[SQLSyntax, ParameterBinder]
 
   def setRelation[A](relation: BaseModel[A]) = ???
+}
+
+trait BaseEntity[MT <: BaseModel[MT]]
+{
+  def data: MT
+
+  def setRelation[RT](relation: Seq[RT]): Unit
+
+  def toJson(implicit writes: Writes[MT]): JsValue = data.toJson()
+}
+
+trait BaseEntityCompanion[ET, MT, DAO]
+{
+  def apply(m: MT, dao: DAO): ET
 }

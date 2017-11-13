@@ -22,6 +22,8 @@ abstract class BaseModelCompanion[MT] extends SQLSyntaxSupport[MT]
 
   def fromSqlResult(rs: WrappedResultSet, rn: ResultName[MT]): MT
 
+  def fromSqlResult(rs: WrappedResultSet): MT = fromSqlResult(rs, defaultTable.resultName)
+
   def toJson(m: Seq[MT])(implicit write: Writes[MT]): JsValue = Json.toJson(m)(Writes.traversableWrites(write))
 
   def seqTypeCase: TypeCase[Seq[MT]]

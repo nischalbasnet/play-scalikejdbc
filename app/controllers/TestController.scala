@@ -70,17 +70,18 @@ class TestController @Inject()(
     //    val userDetail = userDAO.getWithOld(userId, Seq(UserRelations.ADDRESS, UserRelations.GENDER, UserRelations.FRIENDS))
 
     //    val userD = this.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
-//    val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
+    //    val userDt = userDAO.getWith(userId, Seq(UserRelationShips.ADDRESS, UserRelationShips.GENDER, UserRelationShips.FRIENDS))
 
-    val user = userDAO.getOrFail(userId)
-    val userEntity = UserEntity(user, userDAO)
+    val userEntity = userDAO.getEntityOrFail(userId)
     userEntity.friends.get
 
     //    Ok(userDetail.toJson()(User.withFullDetail))
-//    Ok(userDt.get.toJson()(User.withFullDetail))
+    //    Ok(userDt.get.toJson()(User.withFullDetail))
     Ok(Json.toJson(Json.obj(
       "userInfo" -> userEntity.toJson,
-      "friends" -> Json.toJson(userEntity.friends.get)
+      "friends" -> Json.toJson(userEntity.friends.get),
+      "gender" -> Json.toJson(userEntity.gender.get),
+      "userAddress" -> Json.toJson(userEntity.addresses.get)
     )))
     //        Ok(userD.statement)
   }
